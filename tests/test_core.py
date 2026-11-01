@@ -61,3 +61,18 @@ def test_mcp_is_disabled_by_default(tmp_path: Path):
     with pytest.raises(PermissionError):
         import asyncio
         asyncio.run(registry.call_tool('test','ignored'))
+
+
+def test_model_router_allows_only_known_local_ids_without_opt_in():
+    assert ModelRouter({"fast": "ollama_chat/qwen2.5:7b"}, allow_remote=False).select("fast")
+    with pytest.raises(ModelNotConfigured):
+        ModelRouter({"fast": "gpt-4o"}, allow_remote=False).select("fast")
+
+
+def test_usage_summary_aggregates_tokens(tmp_path: Path):
+    store = SQLiteStore(tmp_path / "db.sqlite")
+    store.record_model_usage("local-fast", "fast", 10, 4, 14, None, "run-1")
+    store.record_model_usage("local-fast", "fast", 5, 3, 8, None, "run-1")
+    summary = store.usage_summary("run-1")
+    assert summary[0]["calls"] == 2
+    assert summary[0]["total_tokens"] == 22

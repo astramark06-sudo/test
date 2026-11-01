@@ -7,6 +7,8 @@ from enum import Enum
 from typing import Any
 
 from aiops.config import load_environment
+from aiops.runtime.usage import record_response_usage
+from aiops.storage.sqlite import SQLiteStore
 from urllib.parse import urlparse
 
 
@@ -110,6 +112,8 @@ class ModelRouter:
         messages: list[dict[str, Any]],
         tier: ModelTier | str = ModelTier.STRONG,
         max_tokens: int | None = None,
+        usage_store: SQLiteStore | None = None,
+        run_id: str | None = None,
         **kwargs: Any,
     ) -> Any:
         model = self.select(tier)
@@ -146,9 +150,12 @@ class ModelRouter:
             os.getenv(f"AIOPS_MAX_TOKENS_{tier_key.upper()}", str(self.max_tokens))
         )
         output_cap = max(1, min(max_tokens or tier_cap, tier_cap, self.max_tokens))
-        return completion(
+        response = completion(
             model=model,
             messages=messages,
             max_tokens=output_cap,
             **kwargs,
         )
+        if usage_store is not None:
+            record_response_usage(usage_store, response, tier_key, run_id)
+        return response

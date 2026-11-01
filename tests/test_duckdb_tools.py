@@ -31,3 +31,12 @@ def test_duckdb_rejects_multiple_statements(tmp_path: Path):
     source.write_text("brand\nAcer\n", encoding="utf-8")
     with pytest.raises(ValueError):
         query_file(source, "SELECT * FROM input_data; SELECT 1")
+
+
+
+def test_duckdb_rejects_multiple_trailing_delimiters(tmp_path: Path):
+    source = tmp_path / "inventory.csv"
+    source.write_text("brand\nAcer\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="one SQL statement"):
+        query_file(source, "SELECT * FROM input_data;;")

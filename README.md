@@ -1,15 +1,69 @@
 # AI Operations Platform
 
-A zero-budget, modular AI operations workspace. The initial implementation prioritizes reliable document OCR, structured extraction, validation, and auditable exports.
+A local-first AI workbench for auditable extraction, research, workflow automation and multi-model operations. Core features run without paid APIs or hosted services.
 
-## Initial priorities
+## Core design rules
 
-1. Preserve source files and raw OCR output.
-2. Reconcile multiple OCR engines without discarding disagreements.
-3. Keep OCR-derived prices separate from researched prices.
-4. Export validated records to CSV, JSONL, and Excel.
-5. Run lightweight tests in GitHub Actions; keep heavyweight OCR models out of CI.
+- Preserve raw source data and OCR outputs.
+- Keep OCR-observed prices separate from researched/current prices.
+- Never silently resolve conflicting OCR readings or ambiguous laptop configurations.
+- Route routine tasks to smaller/local models and reserve stronger models for hard cases and final review.
+- Use deterministic code and retrieval for parsing, joins, calculations and long-term context.
+- Checkpoint long workflows in SQLite so interrupted tasks can resume.
+- Do not commit user datasets, screenshots, databases, artifacts, credentials or .env files to this public repository.
 
-## Cost policy
+## Quick start
 
-No paid services, subscriptions, or cloud resources are assumed. Local CPU execution is the default; hosted free tiers are optional and quota-limited.
+    python -m venv .venv
+    source .venv/bin/activate
+    python -m pip install -e '.[dev]'
+    cp .env.example .env
+    aiops init-db
+    pytest -q
+    ruff check .
+
+Core storage, workflow, matching, and JSONL export functions need only Python and SQLite. Optional extras:
+
+    pip install -e '.[llm]'          # LiteLLM model abstraction
+    pip install -e '.[agents]'       # LangGraph orchestration
+    pip install -e '.[mcp]'          # MCP client SDK
+    pip install -e '.[browser]'      # Playwright browser automation
+    pip install -e '.[ocr]'          # PaddleOCR/OpenCV
+    pip install -e '.[data]'         # DuckDB/RapidFuzz
+    pip install -e '.[observability]' # Langfuse client
+
+## Model routing and token efficiency
+
+Set AIOPS_MODEL_FAST, AIOPS_MODEL_STRONG and AIOPS_MODEL_DEEP in .env to LiteLLM model IDs. Hosted providers are blocked by default; explicitly set AIOPS_ALLOW_REMOTE_MODELS=true only when you accept possible provider charges. configs/litellm.config.example.yaml shows local Ollama routes. A router cannot add model context length or increase account/provider quota. The platform improves effective context use through retrieval, compact intermediate state, durable memory and checkpointing. AIOPS_MAX_TOKENS limits each completion request; it is not a token entitlement.
+
+## Storage and resumable workflows
+
+Default database: ./data/aiops.db. It stores workflow runs, per-step checkpoints and searchable memory. The dependency-free sequential engine is the default; LangGraph can be used for branching agent graphs.
+
+    from aiops.storage.sqlite import SQLiteStore
+    from aiops.workflows.engine import Step, WorkflowEngine
+    store = SQLiteStore('./data/aiops.db')
+    result = WorkflowEngine(store).run('example', {'text':'hello'}, [
+        Step('normalize', lambda s: {'normalized': s['text'].strip().lower()}),
+    ])
+
+## MCP and external apps
+
+Copy configs/mcp_servers.example.json to a local file and enable only scoped servers. MCP servers execute as external processes and may have broad file, browser or database permissions. Filesystem access is scoped to project directories. Browser automation should use an isolated profile. Prefer the connected GitHub App and existing Airtable integration over duplicate credentials.
+
+Useful optional apps: GitHub for source control/CI, Airtable for project/source tracking, n8n for local event automation, Langfuse for traces, and Playwright MCP for browser research. Start n8n after configuring .env:
+
+    docker compose --profile automation -f deploy/docker-compose.yml up -d
+
+Playwright MCP setup: https://playwright.dev/docs/getting-started-mcp. The official MCP Fetch server can be run with uvx mcp-server-fetch; it protects private IP ranges by default.
+
+## CLI
+
+    aiops init-db
+    aiops csv-to-jsonl data/candidates.csv artifacts/candidates.jsonl
+    aiops validate-jsonl artifacts/candidates.jsonl
+    aiops run-status RUN_ID
+
+## Data safety
+
+The public repo excludes data/, artifacts/, local DBs, environment files and secrets. Keep private OCR images and generated workbooks outside GitHub. CI runs lightweight unit tests; model weights and browser downloads are excluded.

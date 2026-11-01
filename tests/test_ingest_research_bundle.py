@@ -68,3 +68,25 @@ def test_importer_loads_screenshot_evidence_and_official_specs(tmp_path, monkeyp
         if item["uri"] == "https://manufacturer.example/spec"
     )
     assert source["title"] == "Example model"
+
+
+
+def test_importer_reports_valid_empty_optional_dataset(tmp_path, monkeypatch, capsys):
+    data_dir = tmp_path / "csv"
+    data_dir.mkdir()
+    db_path = tmp_path / "laptop.sqlite"
+
+    write_csv(data_dir / "configuration_register.csv", ["Brand", "Processor"], [])
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["ingest_research_bundle.py", str(data_dir), "--db", str(db_path)],
+    )
+    load_importer().main()
+    report = json.loads(capsys.readouterr().out)
+
+    assert report["datasets"]["configurations"]["status"] == "imported"
+    assert report["datasets"]["configurations"]["rows_imported"] == 0
+    assert report["datasets"]["configurations"]["stored_rows_after_import"] == 0
+    assert SQLiteStore(db_path).count_dataset_records("configurations") == 0

@@ -4,6 +4,10 @@
 
 Security fixes are intended for the latest code on the `main` branch. Older commits and unpublished development branches are not maintained release lines.
 
+## Automated analysis
+
+The repository runs CodeQL analysis for Python on pushes to `main`, pull requests targeting `main` and a weekly schedule. This helps find some classes of code vulnerability; it does not establish that the code is vulnerability-free. Review alerts in the GitHub Security tab and follow the private disclosure process below for new findings.
+
 ## Reporting a vulnerability
 
 Do not publish exploit details, credentials, tokens, private laptop records or sensitive screenshots in a public GitHub issue or pull request.

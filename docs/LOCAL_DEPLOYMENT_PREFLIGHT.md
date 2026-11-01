@@ -27,7 +27,7 @@ aiops doctor --json
 aiops init-db
 ```
 
-Run `aiops doctor` from the repository root before installing optional components. It reports core runtime versions, optional module availability, configuration-file presence, remote-model opt-in state, Ollama endpoint locality and the quick integrity status of an existing database. The check is read-only: it does not contact external services, display secret values, create directories or modify the database.
+Run `aiops doctor` from the repository root before installing optional components. It reports OS and architecture, logical CPU count, physical RAM where available through standard OS APIs, free disk space, GPU inventory-tool availability, core runtime versions, optional module availability, configuration-file presence, remote-model opt-in state, Ollama endpoint locality and the quick integrity status of an existing database. It does not execute GPU inventory commands; use the host OS device manager or vendor utility to confirm the exact GPU and VRAM. The check is read-only: it does not contact external services, display secret values, create directories or modify the database.
 
 On Windows PowerShell, activate with `.venv\\Scripts\\Activate.ps1`. Keep the virtual environment local and do not commit it.
 

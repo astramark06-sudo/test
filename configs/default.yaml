@@ -1,0 +1,23 @@
+project:
+  name: ai-operations-platform
+  mode: local
+  currency: INR
+
+ocr:
+  preserve_raw_output: true
+  retain_engine_disagreements: true
+  engines:
+    - paddleocr
+  image:
+    deskew: true
+    grayscale: true
+    denoise: true
+
+extraction:
+  preserve_source_reference: true
+  separate_ocr_price_from_researched_price: true
+  require_manual_review_on_conflict: true
+
+export:
+  formats: [jsonl, csv, xlsx]
+  output_dir: artifacts

@@ -88,6 +88,30 @@ def main() -> None:
 
     if not batches:
         raise SystemExit(f"No recognised research CSV files found in {args.input_dir}")
+
+    # The enriched candidate export targets the same dataset/key as the raw export.
+    # It is safe to apply second only when it is a full superset with the same IDs.
+    loaded_by_filename = {item[0]: item[4] for item in batches}
+    raw_candidates = loaded_by_filename.get("ocr_candidate_register.csv")
+    enriched_candidates = loaded_by_filename.get("ocr_candidate_register_enriched_tokens.csv")
+    if raw_candidates and enriched_candidates:
+        if not set(raw_candidates.fieldnames).issubset(enriched_candidates.fieldnames):
+            missing = sorted(set(raw_candidates.fieldnames) - set(enriched_candidates.fieldnames))
+            raise SystemExit(
+                "Import preflight failed: enriched candidate export is missing "
+                f"raw-register columns: {', '.join(missing)}"
+            )
+        raw_ids = {row["Candidate_ID"] for row in raw_candidates.rows}
+        enriched_ids = {row["Candidate_ID"] for row in enriched_candidates.rows}
+        if raw_ids != enriched_ids:
+            missing = sorted(raw_ids - enriched_ids)
+            extra = sorted(enriched_ids - raw_ids)
+            raise SystemExit(
+                "Import preflight failed: enriched candidate export must contain "
+                "exactly the raw register's Candidate_IDs; "
+                f"missing={missing[:10]}, extra={extra[:10]}"
+            )
+
     if args.dry_run:
         print(json.dumps(report, indent=2, ensure_ascii=False))
         return

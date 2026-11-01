@@ -54,10 +54,12 @@ Default posture: local-only; remote providers remain blocked.
 
 1. Leave `AIOPS_ALLOW_REMOTE_MODELS=false`.
 2. Keep `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY` empty unless remote access is separately approved and cost understood.
-3. Configure a local Ollama endpoint only after Ollama is installed and reachable at `http://localhost:11434`.
-4. Pick model weights to fit actual host RAM/VRAM and task needs. Do not automatically download large models.
-5. Keep prompts and retrieved context compact; send row batches with stable IDs and source pointers; persist full evidence outside model context.
-6. Record actual observed token usage. A router, model alias or `AIOPS_MAX_TOKENS` setting does not increase the ChatGPT account quota or the model/provider context window.
+3. The local-only router permits `ollama/` and `ollama_chat/` at `OLLAMA_BASE_URL` (default `http://localhost:11434`). It permits `lm_studio/`, `vllm/` and `llamacpp/` only when their respective `LM_STUDIO_BASE_URL`, `VLLM_BASE_URL` or `LLAMACPP_BASE_URL` is explicitly set to a loopback URL. `hosted_vllm/` is not a local backend.
+4. Per-call `api_base` and `base_url` overrides are also required to be loopback URLs. Non-loopback hosts are rejected before the provider call.
+5. Set `AIOPS_ALLOW_REMOTE_MODELS=true` only after explicitly accepting provider cost, terms and data handling; this disables the local-only endpoint restrictions.
+6. Pick model weights to fit actual host RAM/VRAM and task needs. Do not automatically download large models.
+7. Keep prompts and retrieved context compact; send row batches with stable IDs and source pointers; persist full evidence outside model context.
+8. Record actual observed token usage. A router, model alias or `AIOPS_MAX_TOKENS` setting does not increase the ChatGPT account quota or the model/provider context window.
 
 No model weights are included in this repository.
 

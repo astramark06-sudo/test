@@ -27,7 +27,7 @@ aiops doctor --json
 aiops init-db
 ```
 
-Run `aiops doctor` from the repository root before installing optional components. It reports OS and architecture, logical CPU count, physical RAM where available through standard OS APIs, free disk space, GPU inventory-tool availability, core runtime versions, optional package versions, configuration-file presence, remote-model opt-in state, Ollama/LM Studio/vLLM/llama.cpp endpoint locality, n8n encryption-key readiness without printing the key, and the quick integrity status of an existing database. It does not execute GPU inventory commands; use the host OS device manager or vendor utility to confirm the exact GPU and VRAM. The check is read-only: it does not contact external services, display secret values, create directories or modify the database.
+Run `aiops doctor` from the repository root before installing optional components. It reports OS and architecture, logical CPU count, physical RAM where available through standard OS APIs, free disk space, GPU inventory-tool availability, core runtime versions, optional package versions, configuration-file presence, remote-model opt-in state, Ollama/LM Studio/vLLM/custom OpenAI-compatible endpoint locality, n8n encryption-key readiness without printing the key, and the quick integrity status of an existing database. It does not execute GPU inventory commands; use the host OS device manager or vendor utility to confirm the exact GPU and VRAM. The check is read-only: it does not contact external services, display secret values, create directories or modify the database.
 
 On Windows PowerShell, activate with `.venv\\Scripts\\Activate.ps1`. Keep the virtual environment local and do not commit it.
 
@@ -56,7 +56,7 @@ Default posture: local-only; remote providers remain blocked.
 
 1. Leave `AIOPS_ALLOW_REMOTE_MODELS=false`.
 2. Keep `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY` empty unless remote access is separately approved and cost understood.
-3. The local-only router permits `ollama/` and `ollama_chat/` at `OLLAMA_BASE_URL` (default `http://localhost:11434`). It permits `lm_studio/`, `vllm/` and `llamacpp/` only when their respective `LM_STUDIO_BASE_URL`, `VLLM_BASE_URL` or `LLAMACPP_BASE_URL` is explicitly set to a loopback URL. `hosted_vllm/` is not a local backend.
+3. The local-only router permits `ollama/` and `ollama_chat/` at `OLLAMA_BASE_URL` (default `http://localhost:11434`). It permits `lm_studio/` and `vllm/` only when `LM_STUDIO_BASE_URL` or `VLLM_BASE_URL` is explicitly set to a loopback URL. For llama.cpp and other OpenAI-compatible local servers, use the native LiteLLM `custom_openai/` prefix and set `CUSTOM_OPENAI_BASE_URL` to the loopback `/v1` endpoint. `hosted_vllm/` is not a local backend.
 4. Per-call `api_base` and `base_url` overrides are also required to be loopback URLs. Non-loopback hosts are rejected before the provider call.
 5. Set `AIOPS_ALLOW_REMOTE_MODELS=true` only after explicitly accepting provider cost, terms and data handling; this disables the local-only endpoint restrictions.
 6. Pick model weights to fit actual host RAM/VRAM and task needs. Do not automatically download large models.

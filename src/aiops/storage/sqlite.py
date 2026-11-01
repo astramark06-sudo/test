@@ -13,6 +13,11 @@ CREATE TABLE IF NOT EXISTS steps(run_id TEXT NOT NULL REFERENCES runs(run_id) ON
 CREATE TABLE IF NOT EXISTS artifacts(artifact_id INTEGER PRIMARY KEY AUTOINCREMENT,run_id TEXT,path TEXT NOT NULL,kind TEXT,sha256 TEXT,metadata_json TEXT,created_at TEXT DEFAULT CURRENT_TIMESTAMP);
 CREATE TABLE IF NOT EXISTS sources(source_id INTEGER PRIMARY KEY AUTOINCREMENT,uri TEXT NOT NULL UNIQUE,title TEXT,source_type TEXT,retrieved_at TEXT,claims_json TEXT,metadata_json TEXT);
 CREATE TABLE IF NOT EXISTS memories(memory_id INTEGER PRIMARY KEY AUTOINCREMENT,namespace TEXT NOT NULL,title TEXT NOT NULL,body TEXT NOT NULL,metadata_json TEXT,created_at TEXT DEFAULT CURRENT_TIMESTAMP,updated_at TEXT DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE IF NOT EXISTS dataset_records (
+  dataset TEXT NOT NULL, record_key TEXT NOT NULL, source_file TEXT,
+  payload_json TEXT NOT NULL, imported_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY(dataset, record_key)
+);
 CREATE INDEX IF NOT EXISTS idx_runs_status ON runs(status,updated_at);
 CREATE INDEX IF NOT EXISTS idx_steps_status ON steps(run_id,status);
 CREATE INDEX IF NOT EXISTS idx_memories_namespace ON memories(namespace,updated_at);
@@ -167,3 +172,44 @@ class SQLiteStore:
                 args.append(run_id)
             sql += " GROUP BY model,tier ORDER BY total_tokens DESC"
             return [dict(row) for row in con.execute(sql, args).fetchall()]
+
+    def upsert_dataset_records(self, dataset: str, rows: list[dict[str, Any]],
+                               key_field: str | None = None, source_file: str | None = None) -> int:
+        """Import structured rows while retaining the complete original row as JSON."""
+        import hashlib
+        count = 0
+        with self.connect() as con:
+            for row in rows:
+                if key_field and row.get(key_field) not in (None, ""):
+                    record_key = str(row[key_field])
+                else:
+                    canonical = json.dumps(row, sort_keys=True, ensure_ascii=False)
+                    record_key = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+                con.execute("""INSERT INTO dataset_records(dataset,record_key,source_file,payload_json)
+                  VALUES(?,?,?,?) ON CONFLICT(dataset,record_key) DO UPDATE SET
+                  source_file=excluded.source_file,payload_json=excluded.payload_json,
+                  imported_at=CURRENT_TIMESTAMP""",
+                  (dataset, record_key, source_file, json.dumps(row, ensure_ascii=False)))
+                count += 1
+        return count
+
+    def list_dataset_records(self, dataset: str, query: str | None = None,
+                              limit: int = 1000) -> list[dict[str, Any]]:
+        with self.connect() as con:
+            if query:
+                rows = con.execute("SELECT * FROM dataset_records WHERE dataset=? AND payload_json LIKE ? ORDER BY record_key LIMIT ?",
+                                   (dataset, f"%{query}%", max(1, min(limit, 100000)))).fetchall()
+            else:
+                rows = con.execute("SELECT * FROM dataset_records WHERE dataset=? ORDER BY record_key LIMIT ?",
+                                   (dataset, max(1, min(limit, 100000)))).fetchall()
+            output = []
+            for row in rows:
+                item = dict(row)
+                item["record"] = json.loads(item.pop("payload_json"))
+                output.append(item)
+            return output
+
+    def count_dataset_records(self, dataset: str) -> int:
+        with self.connect() as con:
+            row = con.execute("SELECT COUNT(*) AS n FROM dataset_records WHERE dataset=?", (dataset,)).fetchone()
+            return int(row["n"])

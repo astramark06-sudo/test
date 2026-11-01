@@ -31,6 +31,8 @@ Run `aiops doctor` from the repository root before installing optional component
 
 On Windows PowerShell, activate with `.venv\\Scripts\\Activate.ps1`. Keep the virtual environment local and do not commit it.
 
+The Python CLI, model router, MCP client and observability helper load the local `.env` file automatically. Variables already exported in the shell take precedence. The optional n8n service reads the same file through Docker Compose. Keep secrets in the ignored local file.
+
 ### Repository maintenance
 
 - Dependabot checks Python dependencies and GitHub Actions weekly. Related updates are grouped into reviewable pull requests; auto-merge is not enabled.

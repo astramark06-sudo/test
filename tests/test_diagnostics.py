@@ -118,3 +118,30 @@ def test_doctor_accepts_all_loopback_ipv4_addresses(tmp_path: Path, monkeypatch)
     checks = collect_diagnostics(tmp_path / "missing.sqlite", tmp_path)
 
     assert check_map(checks)["Ollama endpoint"]["status"] == "PASS"
+
+
+
+def test_doctor_warns_for_placeholder_n8n_key_without_revealing_it(
+    tmp_path: Path, monkeypatch
+):
+    secret = "replace-with-a-long-random-secret"
+    monkeypatch.setenv("N8N_ENCRYPTION_KEY", secret)
+
+    checks = collect_diagnostics(tmp_path / "missing.sqlite", tmp_path)
+    check = check_map(checks)["n8n encryption key"]
+
+    assert check["status"] == "WARN"
+    assert secret not in repr(checks)
+
+
+def test_doctor_accepts_long_n8n_key_without_revealing_it(
+    tmp_path: Path, monkeypatch
+):
+    secret = "test-only-" + "x" * 48
+    monkeypatch.setenv("N8N_ENCRYPTION_KEY", secret)
+
+    checks = collect_diagnostics(tmp_path / "missing.sqlite", tmp_path)
+    check = check_map(checks)["n8n encryption key"]
+
+    assert check["status"] == "PASS"
+    assert secret not in repr(checks)

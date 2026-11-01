@@ -51,7 +51,9 @@ def test_configuration_match_requires_variant_disambiguation():
         {"Brand":"Acer","Processor":"Intel Core i3-1315U","Model_family":"A","RAM_seen":"8GB","Storage_seen":"512GB SSD"},
         {"Brand":"Acer","Processor":"Intel Core i3-1315U","Model_family":"B","RAM_seen":"16GB","Storage_seen":"512GB SSD"}]
     result=match_configuration(candidate,configs)
-    assert result['match_status']=='unique_configuration_consistent_with_observed_capacities'\n    assert result['researched_Model_family']=='A'\n    assert result['capacity_fields_confirmed'] == ['RAM_detected', 'Storage_detected']
+    assert result['match_status']=='unique_configuration_consistent_with_observed_capacities'
+    assert result['researched_Model_family']=='A'
+    assert result['capacity_fields_confirmed'] == ['RAM_detected', 'Storage_detected']
 
 
 def test_mcp_is_disabled_by_default(tmp_path: Path):

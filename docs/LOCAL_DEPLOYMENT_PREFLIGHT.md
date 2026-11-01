@@ -63,6 +63,16 @@ Default posture: local-only; remote providers remain blocked.
 
 No model weights are included in this repository.
 
+### OCR runtime
+
+- The PaddleOCR adapter targets PaddleOCR 3.7.x and PaddlePaddle 3.2 or newer; the optional OCR extra is pinned to the supported 3.x minor line.
+- Install the CPU-oriented default only when OCR is needed: `python -m pip install -e ".[ocr]"`.
+- The first PaddleOCR run may download model weights. Check free disk and RAM first; do not auto-download on the user's device.
+- GPU runtime installation is host-specific. Confirm OS, Python, CUDA and GPU compatibility against the official PaddlePaddle install matrix before replacing CPU wheels.
+- CI tests normalization with mocked results. A real-image OCR smoke test is still required on the target host and must log package/model versions and device without modifying original images.
+
+See [OCR engine compatibility](OCR_ENGINE_COMPATIBILITY.md).
+
 ## 4. MCP and browser safety
 
 The example MCP registry keeps every server disabled by default. Enable only the one required for a specific workflow.

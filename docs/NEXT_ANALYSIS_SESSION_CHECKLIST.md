@@ -1,5 +1,7 @@
 # Next Analysis Session — Laptop Research Completion Checklist
 
+> Operational state, current code commit, CI/security status and owner-side blockers: [Operator State — 2026-11-02](OPERATOR_STATE_2026-11-02.md). Read that handoff first. The data-analysis task is to verify and reconcile the existing release, not recreate it.
+
 This checklist is deliberately written to prevent duplicate work. A completed private 12-tab workbook and a read-only SQLite workbench already exist in the user's Library. The next analysis session must verify and improve that delivery, not recreate a second workbook from scratch.
 
 ## 0. Starting state — already delivered
@@ -21,15 +23,18 @@ The saved final manifest lists this SHA-256 for the 12-tab workbook:
 
 `96d5d3b8a6145b0a193363e736f2de822976ca6ac1d6e5519bdfd4d9afd30e01`
 
-Treat the saved files as the baseline release. Verify their bytes/hashes before changing anything. Do not regenerate them when the baseline is valid.
+Treat the saved files as the baseline release. Verify their bytes/hashes before changing anything. Do not regenerate them when the baseline is valid. Both saved manifests have been read and agree on the workbook/evidence/JSONL/Tesseract/SQLite bundle hashes; actual byte-level rehashing remains the first data-analysis operation.
 
 ## 1. Restore and inspect source artifacts
+
+Before work, confirm the exact final Library file IDs/names against the Library listing. The canonical final workbook is the 12-tab `laptop_inventory_reconciled_348.xlsx`, not the earlier `laptop_specifications_full_extraction.xlsx` 220-row workbook. Keep the earlier workbook as source/reference input only.
+
 
 1. Locate the existing Library files using Files listing/materialization; never infer a sandbox path from a Library filename.
 2. Materialize the private evidence bundle, workbook and workbench bundle to a working directory.
 3. Extract copies of the archives; retain the originals unchanged.
 4. Read the saved SHA-256 manifests and compare actual file hashes.
-5. Inventory archive contents and confirm screenshot filenames, CSV names, spreadsheet tabs and JSONL count.
+5. Inventory archive contents and confirm screenshot filenames, CSV names, spreadsheet tabs and JSONL count. The private bundle is already saved; verify, do not regenerate.
 6. Record a session manifest with input hashes, tool/runtime versions and date/time.
 7. Never place private source artifacts under a Git-tracked path.
 
@@ -112,6 +117,9 @@ For the new workbook revision:
 
 ## 6. SQLite update and migration safety
 
+The saved private workbench is a **read-only baseline snapshot**. The separate platform importer currently documents an intermediate CSV export profile (including `ocr_prices_199.csv` with 199 rows). The final workbook carries 195 OCR-observed price values. Do not treat these counts as interchangeable. First establish exact file versions, keys and row correspondence. Do not import the intermediate 199-row table as a replacement for the final 195-value workbook evidence without a reviewed mapping.
+
+
 - Use a new database copy for the next import; do not mutate the only saved snapshot.
 - Record hashes of the database, import CSVs and workbook before importing.
 - Run importer mappings from `scripts/ingest_research_bundle.py` and save the import report.
@@ -140,6 +148,15 @@ Release should contain:
 Do not commit any of these private data artifacts to the public GitHub repository. The repository may contain the software, schemas, tests, aggregate process documentation and non-sensitive public source audit links.
 
 ## 8. Final verification
+
+Before running any local installation or service, the current code provides a read-only host check:
+
+```bash
+aiops doctor --project-root . --db ./data/aiops.db --json
+```
+
+It reports OS/architecture, logical cores, physical RAM where available, free disk and presence of GPU inventory utilities, in addition to runtime/config/database checks. It does not execute GPU tools; verify exact GPU model and VRAM with the host OS/vendor utility. Do not install/download model weights until the actual host resources are known.
+
 
 - Read the saved workbook back and confirm the expected tabs, row counts, key columns and links.
 - Compare row counts against each source register.

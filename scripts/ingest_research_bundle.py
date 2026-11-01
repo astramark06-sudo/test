@@ -23,6 +23,11 @@ DATASETS = {
     "ocr_prices_199.csv": ("ocr_prices", "Listing_Record_ID"),
     "manufacturer_spec_facts_2026-11-01.csv": ("manufacturer_spec_facts", "Spec_Fact_ID"),
     "additional_spec_sources_2026-11-01.csv": ("manufacturer_spec_sources", "URL"),
+    "screenshot_manifest.csv": ("screenshot_manifest", "Screenshot_ID"),
+    "screenshot_ocr_regions_2026-11-01.csv": ("screenshot_ocr_regions", "Region_ID"),
+    "ocr_price_evidence_2026-11-01.csv": ("ocr_price_evidence", "Evidence_ID"),
+    "verified_official_specs_2026-11-01.csv": ("verified_official_specs", "Spec_Fact_ID"),
+    "data_dictionary.csv": ("data_dictionary", None),
 }
 
 
@@ -47,15 +52,24 @@ def main() -> None:
             "stored_rows": store.count_dataset_records(dataset),
             "source": str(path),
         }
-        if dataset in {"research_sources", "manufacturer_spec_sources"}:
+        if dataset in {"research_sources", "manufacturer_spec_sources", "verified_official_specs"}:
             for row in rows:
+                url = row.get("URL") or row.get("Official_source_URL")
+                if not url:
+                    continue
                 claims = [
                     row.get("Claims / scope") or row.get("Scope") or "",
                     row.get("Evidence quality / caveat") or "",
+                    row.get("Processor_and_CPU_layout") or "",
+                    row.get("GPU") or "",
+                    row.get("Memory") or "",
+                    row.get("Storage") or "",
+                    row.get("Display") or "",
                 ]
                 source_type = row.get("Source type") or "Manufacturer specification"
+                title = row.get("Source title") or row.get("Model_family_or_SKU")
                 store.record_source(
-                    row["URL"], row.get("Source title"), source_type,
+                    url, title, source_type,
                     [claim for claim in claims if claim],
                     {"source_file": filename, **row},
                 )

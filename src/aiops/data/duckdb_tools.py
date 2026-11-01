@@ -4,7 +4,9 @@ from typing import Any
 
 
 def query_file(path: str | Path, sql: str, limit: int = 1000) -> list[dict[str, Any]]:
-    statement = sql.strip().rstrip(";")
+    statement = sql.strip()
+    if statement.endswith(";"):
+        statement = statement[:-1].rstrip()
     if not (statement.lower().startswith("select ") or statement.lower().startswith("with ")):
         raise ValueError("Only SELECT/WITH queries are allowed")
     if ";" in statement:

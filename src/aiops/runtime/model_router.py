@@ -5,6 +5,8 @@ import ipaddress
 import os
 from enum import Enum
 from typing import Any
+
+from aiops.config import load_environment
 from urllib.parse import urlparse
 
 
@@ -53,6 +55,7 @@ class ModelRouter:
         allow_remote: bool | None = None,
         max_tokens: int | None = None,
     ) -> None:
+        load_environment()
         configured = {
             key: os.getenv(f"AIOPS_MODEL_{key.upper()}", "").strip()
             for key in ("fast", "strong", "deep")

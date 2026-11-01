@@ -1,16 +1,16 @@
-"""Import the saved laptop research CSV bundle into the local SQLite project store."""
+"""Import a validated laptop research CSV bundle into the local SQLite project store."""
 from __future__ import annotations
 
 import argparse
-import csv
 import json
 from pathlib import Path
 
+from aiops.research.import_validation import load_csv_batch
 from aiops.storage.sqlite import SQLiteStore
 
 # Original source tables plus optional derived exports from the consolidated workbook.
-# Later enriched candidate rows intentionally upsert the same Candidate_IDs, replacing
-# the plain row payload with the same source fields plus review-only OCR token fields.
+# Enriched candidate rows intentionally upsert the same Candidate_IDs, replacing
+# the plain row payload; supply the enriched file only when it is the intended superset.
 DATASETS = {
     "ocr_candidate_register.csv": ("laptop_candidates", "Candidate_ID"),
     "ocr_candidate_register_enriched_tokens.csv": ("laptop_candidates", "Candidate_ID"),
@@ -36,24 +36,46 @@ def main() -> None:
     parser.add_argument("input_dir", type=Path, help="Directory containing saved research CSV files")
     parser.add_argument("--db", type=Path, default=Path("./data/laptop_research.sqlite"))
     args = parser.parse_args()
-    store = SQLiteStore(args.db)
+
+    if not args.input_dir.is_dir():
+        raise SystemExit(f"Input directory not found: {args.input_dir}")
+
+    # Preflight every present file before opening the database for writes. A malformed
+    # late file must not leave a partially imported multi-dataset bundle.
+    batches = []
     report = {"database": str(args.db), "datasets": {}}
     for filename, (dataset, key_field) in DATASETS.items():
         path = args.input_dir / filename
         if not path.exists():
             report["datasets"][dataset] = {"status": "missing", "source": str(path)}
             continue
-        with path.open(newline="", encoding="utf-8-sig") as stream:
-            rows = list(csv.DictReader(stream))
-        imported = store.upsert_dataset_records(dataset, rows, key_field, str(path))
+        try:
+            batch = load_csv_batch(path, key_field)
+        except ValueError as exc:
+            raise SystemExit(f"Import preflight failed: {exc}") from exc
+        batches.append((filename, dataset, key_field, path, batch))
         report["datasets"][dataset] = {
-            "status": "imported",
-            "rows": imported,
-            "stored_rows": store.count_dataset_records(dataset),
+            "status": "preflight_ok",
+            "rows": len(batch.rows),
+            "duplicate_content_rows": batch.duplicate_content_rows,
             "source": str(path),
         }
+
+    if not batches:
+        raise SystemExit(f"No recognised research CSV files found in {args.input_dir}")
+
+    store = SQLiteStore(args.db)
+    for filename, dataset, key_field, path, batch in batches:
+        imported = store.upsert_dataset_records(
+            dataset, batch.rows, key_field, str(path)
+        )
+        report["datasets"][dataset].update({
+            "status": "imported",
+            "rows_imported": imported,
+            "stored_rows_after_import": store.count_dataset_records(dataset),
+        })
         if dataset in {"research_sources", "manufacturer_spec_sources", "verified_official_specs"}:
-            for row in rows:
+            for row in batch.rows:
                 url = row.get("URL") or row.get("Official_source_URL")
                 if not url:
                     continue

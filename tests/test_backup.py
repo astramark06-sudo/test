@@ -84,3 +84,24 @@ def test_backup_rejects_same_source_and_destination(tmp_path: Path):
 
     with pytest.raises(ValueError, match="differ from the source"):
         backup_database(source, source)
+
+
+
+def test_cli_backup_db_command_creates_a_verified_copy(tmp_path: Path, monkeypatch, capsys):
+    import sys
+
+    from aiops.cli import main
+
+    source = tmp_path / "source.sqlite"
+    destination = tmp_path / "cli-backup.sqlite"
+    make_source(source)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["aiops", "backup-db", str(destination), "--db", str(source)],
+    )
+
+    main()
+
+    assert read_records(destination) == read_records(source)
+    assert "Verified SQLite backup created" in capsys.readouterr().out

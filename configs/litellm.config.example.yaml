@@ -1,0 +1,12 @@
+# Local-only example. Install Ollama and pull the referenced models before use.
+model_list:
+  - model_name: local-fast
+    litellm_params:
+      model: ollama_chat/qwen2.5:7b
+      api_base: os.environ/OLLAMA_BASE_URL
+  - model_name: local-strong
+    litellm_params:
+      model: ollama_chat/qwen2.5:14b
+      api_base: os.environ/OLLAMA_BASE_URL
+litellm_settings:
+  drop_params: true

@@ -66,6 +66,8 @@ Playwright MCP setup: https://playwright.dev/docs/getting-started-mcp. The offic
     aiops doctor
     aiops doctor --json
     aiops backup-db ./backups/aiops-YYYYMMDD.sqlite --db ./data/aiops.db
+    aiops hash-tree ./release ./release.manifest.json
+    aiops verify-manifest ./release ./release.manifest.json
     aiops init-db
     aiops csv-to-jsonl data/candidates.csv artifacts/candidates.jsonl
     aiops validate-jsonl artifacts/candidates.jsonl
@@ -90,6 +92,8 @@ Import CSV datasets into SQLite without dropping source columns. Original row co
 Before creating or writing to the SQLite database, `aiops ingest-csv` validates the complete CSV: it requires a header, rejects empty or duplicate column names, checks every row width, and validates a supplied stable-key column for missing, blank, whitespace-padded or duplicate values. Keyless imports use deterministic row-content hashes; exact duplicate-content rows are reported because identical rows share one stored key. A failed preflight leaves the target database untouched.
 
 `aiops backup-db OUTPUT --db SOURCE` uses SQLite's online backup API, opens the source read-only, checks the finished copy with `PRAGMA integrity_check`, then atomically places it at the destination. Existing destinations are refused unless `--overwrite` is supplied; a failed backup leaves the existing destination unchanged.
+
+`aiops hash-tree DIRECTORY OUTPUT` writes a sorted SHA-256/size manifest outside the inventoried folder. `aiops verify-manifest DIRECTORY MANIFEST` checks every hash and size and also detects missing, unlisted or symlinked files. Keep the manifest beside—not inside—the immutable source folder.
 
 Dataset import is idempotent for a stable key field. Private datasets stay local and are excluded from Git.
 

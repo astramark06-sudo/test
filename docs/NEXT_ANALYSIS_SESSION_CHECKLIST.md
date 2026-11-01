@@ -28,7 +28,7 @@ Treat the saved files as the baseline release. Verify their bytes/hashes before 
 1. Locate the existing Library files using Files listing/materialization; never infer a sandbox path from a Library filename.
 2. Materialize the private evidence bundle, workbook and workbench bundle to a working directory.
 3. Extract copies of the archives; retain the originals unchanged.
-4. Read the saved SHA-256 manifests and compare actual file hashes.
+4. Read the saved SHA-256 manifests and compare actual file hashes. For new copied directories, use `aiops hash-tree ./private-source ./private-source.manifest.json` then `aiops verify-manifest ./private-source ./private-source.manifest.json`; keep manifest files outside the source tree.
 5. Inventory archive contents and confirm screenshot filenames, CSV names, spreadsheet tabs and JSONL count.
 6. Record a session manifest with input hashes, tool/runtime versions and date/time.
 7. Never place private source artifacts under a Git-tracked path.

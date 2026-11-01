@@ -82,3 +82,74 @@ def test_bundle_import_preflights_all_files_before_creating_database(tmp_path: P
     assert result.returncode != 0
     assert "duplicate column names" in result.stderr
     assert database.exists() is False
+
+
+
+def test_bundle_import_rejects_incomplete_enriched_candidate_superset(tmp_path: Path):
+    input_dir = tmp_path / "input"
+    input_dir.mkdir()
+    (input_dir / "ocr_candidate_register.csv").write_text(
+        "Candidate_ID,OCR_title\nS1-001,Samsung\nS1-002,HP\n",
+        encoding="utf-8",
+    )
+    (input_dir / "ocr_candidate_register_enriched_tokens.csv").write_text(
+        "Candidate_ID,OCR_title,Price_tokens\nS1-001,Samsung,\n",
+        encoding="utf-8",
+    )
+    database = tmp_path / "must_not_exist.sqlite"
+    repository_root = Path(__file__).resolve().parents[1]
+    script = repository_root / "scripts" / "ingest_research_bundle.py"
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(script),
+            str(input_dir),
+            "--db",
+            str(database),
+            "--dry-run",
+        ],
+        cwd=repository_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert "exactly the raw register's Candidate_IDs" in result.stderr
+    assert database.exists() is False
+
+
+def test_bundle_import_rejects_enriched_export_that_drops_raw_columns(tmp_path: Path):
+    input_dir = tmp_path / "input"
+    input_dir.mkdir()
+    (input_dir / "ocr_candidate_register.csv").write_text(
+        "Candidate_ID,OCR_title,OCR_context\nS1-001,Samsung,Raw source context\n",
+        encoding="utf-8",
+    )
+    (input_dir / "ocr_candidate_register_enriched_tokens.csv").write_text(
+        "Candidate_ID,OCR_title,Price_tokens\nS1-001,Samsung,\n",
+        encoding="utf-8",
+    )
+    database = tmp_path / "must_not_exist.sqlite"
+    repository_root = Path(__file__).resolve().parents[1]
+    script = repository_root / "scripts" / "ingest_research_bundle.py"
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(script),
+            str(input_dir),
+            "--db",
+            str(database),
+            "--dry-run",
+        ],
+        cwd=repository_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert "missing raw-register columns" in result.stderr
+    assert database.exists() is False

@@ -20,6 +20,7 @@ DATASETS = {
     "source_register.csv": ("research_sources", "URL"),
     "extracted_listings_220.csv": ("extracted_listings", "Listing_Record_ID"),
     "candidate_crosswalk_review.csv": ("candidate_crosswalk", "Candidate_ID"),
+    "ocr_prices_199.csv": ("ocr_prices", "Listing_Record_ID"),
     "manufacturer_spec_facts_2026-11-01.csv": ("manufacturer_spec_facts", "Spec_Fact_ID"),
     "additional_spec_sources_2026-11-01.csv": ("manufacturer_spec_sources", "URL"),
 }

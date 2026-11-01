@@ -12,6 +12,7 @@ from aiops.config import load_environment
 from aiops.diagnostics import collect_diagnostics, diagnostics_failed, render_diagnostics
 from aiops.export.jsonl import write_jsonl
 from aiops.research.import_validation import load_csv_batch
+from aiops.storage.backup import backup_database
 from aiops.storage.sqlite import SQLiteStore
 
 
@@ -78,6 +79,23 @@ def main() -> None:
         "--db",
         type=Path,
         default=Path(os.getenv("AIOPS_DB_PATH", "./data/aiops.db")),
+    )
+
+    backup = sub.add_parser(
+        "backup-db",
+        help="Create an integrity-checked SQLite online backup",
+    )
+    backup.add_argument("output", type=Path, help="Backup destination path")
+    backup.add_argument(
+        "--db",
+        type=Path,
+        default=Path(os.getenv("AIOPS_DB_PATH", "./data/aiops.db")),
+        help="Source SQLite database (defaults to AIOPS_DB_PATH)",
+    )
+    backup.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Replace an existing destination only after the new backup validates",
     )
 
     doctor = sub.add_parser(
@@ -159,6 +177,14 @@ def main() -> None:
     elif args.command == "dataset-count":
         total = SQLiteStore(args.db).count_dataset_records(args.dataset)
         print(total)
+
+    elif args.command == "backup-db":
+        destination = backup_database(
+            args.db,
+            args.output,
+            overwrite=args.overwrite,
+        )
+        print(f"Verified SQLite backup created: {destination}")
 
     elif args.command == "doctor":
         checks = collect_diagnostics(args.db, args.project_root)

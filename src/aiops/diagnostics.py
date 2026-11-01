@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import importlib.util
+import ipaddress
 import os
 import platform
 import shutil
@@ -82,6 +83,17 @@ def _human_bytes(value: int) -> str:
             return f"{amount:.1f} {unit}"
         amount /= 1024
     return f"{amount:.1f} TiB"
+
+
+def _is_loopback_host(host: str) -> bool:
+    """Recognize localhost and every IPv4/IPv6 loopback address."""
+    normalized = host.casefold().rstrip(".")
+    if normalized == "localhost":
+        return True
+    try:
+        return ipaddress.ip_address(normalized).is_loopback
+    except ValueError:
+        return False
 
 
 def collect_diagnostics(
@@ -227,7 +239,7 @@ def collect_diagnostics(
         parsed = urlparse(ollama_url)
         if parsed.scheme not in {"http", "https"} or not parsed.hostname:
             checks.append(_check("Ollama endpoint", "FAIL", "configured URL is malformed"))
-        elif parsed.hostname.lower() in {"localhost", "127.0.0.1", "::1"}:
+        elif _is_loopback_host(parsed.hostname):
             checks.append(_check("Ollama endpoint", "PASS", "configured loopback endpoint; no connection attempted"))
         else:
             checks.append(

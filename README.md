@@ -59,6 +59,8 @@ Playwright MCP setup: https://playwright.dev/docs/getting-started-mcp. The offic
 
 ## CLI
 
+    aiops doctor
+    aiops doctor --json
     aiops init-db
     aiops csv-to-jsonl data/candidates.csv artifacts/candidates.jsonl
     aiops validate-jsonl artifacts/candidates.jsonl
@@ -77,6 +79,8 @@ Import CSV datasets into SQLite without dropping source columns. Original row co
 
     aiops ingest-csv data/candidates.csv candidates --key-field Candidate_ID
     aiops dataset-count candidates
+
+`aiops doctor` performs read-only host checks: Python and SQLite versions, optional integration modules, project configuration-file presence, remote-model opt-in state, Ollama endpoint locality, and an existing SQLite database's quick integrity check. It does not contact external services, read or print secret values, create directories, or modify the database. Run it from the project root before enabling optional components.
 
 Before creating or writing to the SQLite database, `aiops ingest-csv` validates the complete CSV: it requires a header, rejects empty or duplicate column names, checks every row width, and validates a supplied stable-key column for missing, blank, whitespace-padded or duplicate values. Keyless imports use deterministic row-content hashes; exact duplicate-content rows are reported because identical rows share one stored key. A failed preflight leaves the target database untouched.
 

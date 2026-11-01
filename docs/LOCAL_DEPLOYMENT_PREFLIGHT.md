@@ -22,8 +22,12 @@ python -m pip install --upgrade pip
 python -m pip install -e ".[dev,data]"
 ruff check .
 pytest -q
+aiops doctor
+aiops doctor --json
 aiops init-db
 ```
+
+Run `aiops doctor` from the repository root before installing optional components. It reports core runtime versions, optional module availability, configuration-file presence, remote-model opt-in state, Ollama endpoint locality and the quick integrity status of an existing database. The check is read-only: it does not contact external services, display secret values, create directories or modify the database.
 
 On Windows PowerShell, activate with `.venv\\Scripts\\Activate.ps1`. Keep the virtual environment local and do not commit it.
 

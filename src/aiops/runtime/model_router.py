@@ -121,6 +121,21 @@ class ModelRouter:
                         f"Non-loopback {endpoint_key} override blocked in local-only mode."
                     )
 
+            if kwargs.get("api_base") is None and kwargs.get("base_url") is None:
+                backend = next(
+                    (
+                        (endpoint_env, default)
+                        for prefix, (endpoint_env, default) in _LOCAL_BACKENDS.items()
+                        if model.startswith(prefix)
+                    ),
+                    None,
+                )
+                if backend is not None:
+                    endpoint_env, default = backend
+                    endpoint = os.getenv(endpoint_env, default or "").strip()
+                    if endpoint:
+                        kwargs["api_base"] = endpoint
+
         try:
             from litellm import completion
         except ImportError as exc:

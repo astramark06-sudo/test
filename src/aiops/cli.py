@@ -1,36 +1,39 @@
-"""Command-line entry point."""
-
-import argparse
-import json
+"""Local operations command line."""
+import argparse, csv, json, os
 from pathlib import Path
-
 from aiops.export.jsonl import write_jsonl
-
+from aiops.storage.sqlite import SQLiteStore
 
 def main() -> None:
-    parser = argparse.ArgumentParser(prog="aiops", description="AI Operations Platform utilities")
-    sub = parser.add_subparsers(dest="command", required=True)
-    validate = sub.add_parser("validate-jsonl", help="Check that every JSONL line is valid JSON")
-    validate.add_argument("path", type=Path)
-    export = sub.add_parser("export-jsonl", help="Write JSON records to JSONL")
-    export.add_argument("input", type=Path, help="JSON file containing an array of objects")
-    export.add_argument("output", type=Path)
-    args = parser.parse_args()
-
-    if args.command == "validate-jsonl":
-        count = 0
-        with args.path.open(encoding="utf-8") as stream:
-            for line_number, line in enumerate(stream, 1):
+    parser=argparse.ArgumentParser(prog='aiops',description='AI Operations Platform utilities')
+    sub=parser.add_subparsers(dest='command',required=True)
+    p=sub.add_parser('validate-jsonl'); p.add_argument('path',type=Path)
+    p=sub.add_parser('export-jsonl'); p.add_argument('input',type=Path); p.add_argument('output',type=Path)
+    p=sub.add_parser('init-db'); p.add_argument('--db',type=Path,default=Path(os.getenv('AIOPS_DB_PATH','./data/aiops.db')))
+    p=sub.add_parser('csv-to-jsonl'); p.add_argument('input',type=Path); p.add_argument('output',type=Path)
+    p=sub.add_parser('run-status'); p.add_argument('run_id'); p.add_argument('--db',type=Path,default=Path(os.getenv('AIOPS_DB_PATH','./data/aiops.db')))
+    a=parser.parse_args()
+    if a.command=='validate-jsonl':
+        count=0
+        with a.path.open(encoding='utf-8') as f:
+            for n,line in enumerate(f,1):
                 if line.strip():
-                    json.loads(line)
-                    count += 1
-        print(f"Valid JSONL: {count} records")
-    elif args.command == "export-jsonl":
-        records = json.loads(args.input.read_text(encoding="utf-8"))
-        if not isinstance(records, list) or not all(isinstance(row, dict) for row in records):
-            raise SystemExit("Input must be a JSON array of objects")
-        print(write_jsonl(records, args.output))
+                    try: json.loads(line)
+                    except json.JSONDecodeError as exc: raise SystemExit(f'Invalid JSON on line {n}: {exc}') from exc
+                    count+=1
+        print(f'Valid JSONL: {count} records')
+    elif a.command=='export-jsonl':
+        rows=json.loads(a.input.read_text(encoding='utf-8'))
+        if not isinstance(rows,list) or not all(isinstance(x,dict) for x in rows): raise SystemExit('Input must be a JSON array of objects')
+        print(write_jsonl(rows,a.output))
+    elif a.command=='init-db':
+        SQLiteStore(a.db); print(f'Initialized SQLite database: {a.db}')
+    elif a.command=='csv-to-jsonl':
+        with a.input.open(newline='',encoding='utf-8-sig') as f: rows=list(csv.DictReader(f))
+        print(write_jsonl(rows,a.output)); print(f'Converted {len(rows)} CSV rows')
+    elif a.command=='run-status':
+        record=SQLiteStore(a.db).get_run(a.run_id)
+        if record is None: raise SystemExit(f'Run not found: {a.run_id}')
+        print(json.dumps(record,indent=2,ensure_ascii=False))
 
-
-if __name__ == "__main__":
-    main()
+if __name__=='__main__': main()

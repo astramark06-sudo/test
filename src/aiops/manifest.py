@@ -6,7 +6,7 @@ import json
 import os
 import re
 import tempfile
-from pathlib import Path, PurePosixPath
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any
 
 
@@ -113,8 +113,11 @@ def verify_manifest(
         if not isinstance(relative, str) or not relative:
             raise ValueError("Manifest entry has an invalid path")
         pure = PurePosixPath(relative)
+        windows = PureWindowsPath(relative)
         if (
             pure.is_absolute()
+            or windows.is_absolute()
+            or bool(windows.drive)
             or "\\" in relative
             or ".." in pure.parts
             or "." in pure.parts

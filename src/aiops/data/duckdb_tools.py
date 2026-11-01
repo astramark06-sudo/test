@@ -19,10 +19,10 @@ def query_file(path: str | Path, sql: str, limit: int = 1000) -> list[dict[str, 
     max_rows = max(1, min(int(limit), 100_000))
     connection = duckdb.connect(database=":memory:")
     try:
+        # Materialize the caller-selected CSV before disabling external file access.
         connection.execute(
-            f"CREATE VIEW input_data AS SELECT * FROM read_csv_auto('{file_path}', header=true)"
+            f"CREATE TABLE input_data AS SELECT * FROM read_csv_auto('{file_path}', header=true)"
         )
-        # The approved source is loaded before external I/O is disabled.
         connection.execute("SET enable_external_access = false")
         connection.execute("SET lock_configuration = true")
         cursor = connection.execute(

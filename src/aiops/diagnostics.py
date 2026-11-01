@@ -8,7 +8,6 @@ import sqlite3
 import sys
 from pathlib import Path
 from urllib.parse import urlparse
-from typing import Any
 
 
 OPTIONAL_MODULES = (

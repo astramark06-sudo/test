@@ -8,11 +8,18 @@ from pathlib import Path
 
 from aiops.storage.sqlite import SQLiteStore
 
+# Original source tables plus optional derived exports from the consolidated workbook.
+# Later enriched candidate rows intentionally upsert the same Candidate_IDs, replacing
+# the plain row payload with the same source fields plus review-only OCR token fields.
 DATASETS = {
     "ocr_candidate_register.csv": ("laptop_candidates", "Candidate_ID"),
+    "ocr_candidate_register_enriched_tokens.csv": ("laptop_candidates", "Candidate_ID"),
     "configuration_register.csv": ("configurations", None),
+    "configuration_benchmark_join.csv": ("configurations_with_benchmarks", None),
     "cpu_benchmarks.csv": ("cpu_benchmarks", "CPU"),
     "source_register.csv": ("research_sources", "URL"),
+    "extracted_listings_220.csv": ("extracted_listings", "Listing_Record_ID"),
+    "candidate_crosswalk_review.csv": ("candidate_crosswalk", "Candidate_ID"),
 }
 
 

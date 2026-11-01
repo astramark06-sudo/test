@@ -216,3 +216,40 @@ https://www.lenovo.com/in/outletin/en/p/laptops/ideapad/ideapad-s-series/ideapad
 This Lenovo outlet product record identifies part number 82RKXA11IN as an IdeaPad 3i Gen 7, Core i5-1235U, 16GB DDR4-3200 (8GB soldered + 8GB SO-DIMM), 512GB PCIe Gen3 SSD, 15.6-inch FHD TN 250-nit display, Windows 11 Home, and backlit keyboard. It is explicitly marked certified refurbished.
 
 **Disposition:** This proves an official Lenovo India outlet listing with the CPU/RAM/storage combination exists, but it must not be used to identify an OCR listing as new or as a different IdeaPad Slim 3 model. Treat it as a refurbished SKU lead only; confirm the part number and product condition before matching.
+
+
+## 22. Acer Aspire Lite AL15-53 — Core 3 100U, 8GB / 512GB
+
+**Acer India Official Store reference UN.34ESI.02E:**  
+https://store.acer.com/en-in/windows-11-home/graphics_manufacturer-intelr
+
+Acer's indexed India store product record identifies Aspire Lite AL15-53, reference UN.34ESI.02E, with Intel Core 3 100U, 8GB DDR4, 512GB PCIe Gen3 NVMe, 15.6-inch FHD IPS display, Intel UHD Graphics and Windows 11 Home. The indexed record states 1.59kg. Acer's store category data is dynamic; retain the exact reference code and recheck the product detail before claiming current orderability.
+
+**Disposition:** Strong official model/configuration match lead for the Acer Aspire Lite Core 3 100U / 8GB / 512GB configuration. It is not the same as an Acer Aspire 3, nor proof of the exact screenshot SKU without part-number evidence.
+
+## 23. Acer Aspire 3 A325-42 — Ryzen 3 5300U, 8GB / 512GB
+
+**Acer India Official Store exact reference UN.34QSI.018:**  
+https://store.acer.com/en-in/acer-aspire-3-amd-ryzen-r3-5300u-processor-windows-11-15-6-39-62-cm-full-hd-display-8gb-ram-512gb-ssd-gray-a325-42-1-79-kg-think-and-light-laptop
+
+The product page explicitly identifies A325-42 / UN.34QSI.018, Ryzen 3 5300U, 8GB DDR4, 512GB PCIe NVMe, 15.6-inch FHD IPS, Windows 11 Home, Radeon integrated graphics and 1.79kg. The page also states upgrade support to 32GB memory and up to 1TB storage.
+
+**Disposition:** Strong exact manufacturer product reference for the Aspire 3 R3-5300U / 8GB / 512GB configuration. Use this source only when the screenshot's Aspire 3 family and display/configuration are consistent; require UN.34QSI.018 or A325-42 before claiming exact SKU identity.
+
+## 24. Lenovo IdeaPad Slim 3i Gen 7 — 82RK0085IN, i5-1235U, 16GB / 512GB
+
+**Lenovo India Store:**  
+https://store.lenovo.com/in/en/ideapad-slim-3i-39-62cms-12th-gen-intel-i5-82rk0085in-553-1.html
+
+The official Lenovo store record for model 82RK0085IN lists Core i5-1235U, 16GB DDR4-3200 as 8GB soldered + 8GB SO-DIMM, 512GB M.2 2280 SSD, Windows 11 Home 64, integrated Iris Xe graphics and a 15.6-inch FHD TN 250-nit display. The store page describes the product family as IdeaPad 3i Gen 7 / Slim 3i.
+
+**Disposition:** Strong exact product lead for the i5-1235U / 16GB / 512GB configuration, with a specific installed memory topology. Match the screenshot to 82RK0085IN before carrying over its TN panel, soldered-plus-SO-DIMM topology or warranty. Lenovo pages state specifications may vary by region/model.
+
+## 25. Lenovo IdeaPad Slim 3i Gen 7 — 82RJ005CIN, i5-1235U, 8GB / 512GB
+
+**Lenovo India Store:**  
+https://store.lenovo.com/in/en/ideapad-slim-3i-35-56cms-12th-gen-intel-i5-82rj005cin-1525-1.html
+
+The Lenovo page identifies 82RJ005CIN as a 14-inch IdeaPad Slim 3i / 3i Gen 7 with Core i5-1235U, 8GB soldered DDR4-3200, 512GB M.2 2280 SSD, Windows 11 Home, Iris Xe, a 14-inch FHD IPS 300-nit anti-glare panel and 2-year onsite warranty.
+
+**Disposition:** Strong exact product lead for an i5-1235U / 8GB / 512GB 14-inch Lenovo listing. Do not merge with 82RK0085IN: the latter is a 15.6-inch 16GB configuration with a different panel and memory layout.

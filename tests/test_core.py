@@ -170,3 +170,46 @@ def test_model_router_requires_explicit_loopback_for_non_ollama_backend(monkeypa
 
     monkeypatch.setenv("VLLM_BASE_URL", "http://127.0.0.2:8000/v1")
     assert router.select("fast") == "vllm/local-model"
+
+
+
+def test_workflow_rejects_duplicate_step_names_before_creating_a_run(tmp_path: Path):
+    store = SQLiteStore(tmp_path / "db.sqlite")
+    engine = WorkflowEngine(store)
+
+    with pytest.raises(ValueError, match="must be unique"):
+        engine.run(
+            "duplicate",
+            {},
+            [Step("same", lambda _: {"first": True}), Step("same", lambda _: {"second": True})],
+            run_id="duplicate-run",
+        )
+
+    assert store.get_run("duplicate-run") is None
+
+
+def test_workflow_rejects_changed_step_order_on_resume(tmp_path: Path):
+    store = SQLiteStore(tmp_path / "db.sqlite")
+    engine = WorkflowEngine(store)
+    steps = [
+        Step("first", lambda _: {"first": True}),
+        Step("second", lambda _: {"second": True}),
+    ]
+    engine.run("ordered", {}, steps, run_id="ordered-run")
+
+    with pytest.raises(ValueError, match="differs from the saved checkpoint plan"):
+        engine.run("ordered", {}, list(reversed(steps)), run_id="ordered-run")
+
+
+def test_workflow_rejects_legacy_checkpoints_without_a_saved_plan(tmp_path: Path):
+    store = SQLiteStore(tmp_path / "db.sqlite")
+    store.create_run("legacy-run", "legacy", {})
+    store.save_step("legacy-run", "first", "completed", {}, {"done": True})
+
+    with pytest.raises(ValueError, match="legacy checkpoints"):
+        WorkflowEngine(store).run(
+            "legacy",
+            {},
+            [Step("first", lambda _: {"done": True})],
+            run_id="legacy-run",
+        )

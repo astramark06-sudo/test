@@ -9,6 +9,12 @@ def _result_mapping(result: Any) -> Mapping[str, Any]:
     """Return the OCR result payload across PaddleOCR 3.x result wrappers."""
     if isinstance(result, Mapping):
         payload: Any = result
+        if "rec_texts" not in payload and "res" not in payload:
+            wrapped = getattr(result, "json", None)
+            if callable(wrapped):
+                wrapped = wrapped()
+            if isinstance(wrapped, Mapping):
+                payload = wrapped
     else:
         payload = getattr(result, "json", None)
         if callable(payload):

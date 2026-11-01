@@ -6,7 +6,7 @@ Security fixes are intended for the latest code on the `main` branch. Older comm
 
 ## Automated analysis
 
-The repository runs CodeQL analysis for Python on pushes to `main`, pull requests targeting `main` and a weekly schedule. This helps find some classes of code vulnerability; it does not establish that the code is vulnerability-free. Review alerts in the GitHub Security tab and follow the private disclosure process below for new findings.
+The repository runs CodeQL analysis for Python on pushes to `main`, pull requests targeting `main` and a weekly schedule. Pull requests also run dependency review against new or updated runtime, development and unknown-scope dependencies, failing on newly introduced high or critical vulnerabilities and showing patched versions where available. These automated checks help identify some risks; they do not establish that the code is vulnerability-free. Review alerts in the GitHub Security tab and follow the private disclosure process below for new findings.
 
 ## Reporting a vulnerability
 

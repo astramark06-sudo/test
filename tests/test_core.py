@@ -76,3 +76,13 @@ def test_usage_summary_aggregates_tokens(tmp_path: Path):
     summary = store.usage_summary("run-1")
     assert summary[0]["calls"] == 2
     assert summary[0]["total_tokens"] == 22
+
+
+def test_dataset_import_is_idempotent_and_preserves_fields(tmp_path: Path):
+    store = SQLiteStore(tmp_path / "db.sqlite")
+    rows = [{"Candidate_ID": "L001", "OCR_context": "Core i5 8GB", "OCR_price": "44990"}]
+    assert store.upsert_dataset_records("candidates", rows, "Candidate_ID", "input.csv") == 1
+    assert store.upsert_dataset_records("candidates", rows, "Candidate_ID", "input.csv") == 1
+    assert store.count_dataset_records("candidates") == 1
+    restored = store.list_dataset_records("candidates", "Core i5")[0]["record"]
+    assert restored == rows[0]

@@ -86,3 +86,4 @@ The private laptop OCR delivery has its own audited workbench and an ingestion r
 
 - [Laptop dataset runbook](docs/LAPTOP_DATASET_RUNBOOK.md): inspect the private read-only SQLite snapshot, import compatible CSV batches, and run coverage checks.
 - [Research fact schema](docs/RESEARCH_FACT_SCHEMA.md): capture exact-SKU/model-family scope, one fact per source, price-type separation and conflict handling.
+- [Official model source audit — 2026-11-02](docs/OFFICIAL_MODEL_SOURCE_AUDIT_2026-11-02.md): scoped manufacturer-source checks and unresolved SKU/OS conflicts; no inferred price updates.

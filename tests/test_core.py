@@ -26,11 +26,24 @@ def test_workflow_checkpoints_and_resumes(tmp_path: Path):
     assert store.get_run('r1')['status']=='completed'
 
 
-def test_failed_step_can_resume_with_same_input(tmp_path: Path):
-    store=SQLiteStore(tmp_path/'db.sqlite'); engine=WorkflowEngine(store)
-    with pytest.raises(ValueError): engine.run('wf',{},[Step('fail',lambda _: (_ for _ in ()).throw(ValueError('x')))],run_id='r2')
-    result=engine.run('wf',{},[Step('fail',lambda _: {"done":True})],run_id='r2')
-    assert result['done'] is True
+def test_failed_step_can_resume_with_same_input_and_revision(tmp_path: Path):
+    store = SQLiteStore(tmp_path / "db.sqlite")
+    engine = WorkflowEngine(store)
+    attempts = {"count": 0}
+
+    def transient_failure(_state):
+        attempts["count"] += 1
+        if attempts["count"] == 1:
+            raise ValueError("temporary failure")
+        return {"done": True}
+
+    steps = [Step("retryable", transient_failure, revision="1")]
+    with pytest.raises(ValueError, match="temporary failure"):
+        engine.run("wf", {}, steps, run_id="r2")
+    result = engine.run("wf", {}, steps, run_id="r2")
+
+    assert result["done"] is True
+    assert attempts["count"] == 2
 
 
 def test_memory_search_namespaced(tmp_path: Path):

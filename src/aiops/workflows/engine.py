@@ -17,6 +17,7 @@ _PLAN_STEP_NAME = "__aiops_workflow_plan__"
 class Step:
     name: str
     handler: Callable[[dict[str, Any]], dict[str, Any]]
+    revision: str = "1"
 
 
 class WorkflowEngine:
@@ -37,8 +38,17 @@ class WorkflowEngine:
             raise ValueError("Workflow step names must be unique")
         if any(not callable(step.handler) for step in steps):
             raise TypeError("Every workflow step handler must be callable")
+        if any(
+            not isinstance(step.revision, str) or not step.revision.strip()
+            for step in steps
+        ):
+            raise ValueError("Every workflow step must have a non-empty revision")
 
-        definition = {"workflow": workflow, "step_names": names}
+        definition = {
+            "workflow": workflow,
+            "step_names": names,
+            "step_revisions": [step.revision for step in steps],
+        }
         canonical = json.dumps(definition, sort_keys=True, separators=(",", ":"))
         return {**definition, "fingerprint": hashlib.sha256(canonical.encode()).hexdigest()}
 

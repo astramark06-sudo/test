@@ -202,6 +202,7 @@ class SQLiteStore:
             for batch in batches:
                 dataset = str(batch["dataset"])
                 rows = batch["rows"]
+                imported.setdefault(dataset, 0)
                 key_field = batch.get("key_field")
                 source_file = batch.get("source_file")
                 for row in rows:

@@ -18,7 +18,7 @@
 3. Store compact intermediate summaries plus references to raw evidence.
 4. Use deterministic code for parsing, joins, arithmetic and validation.
 5. Escalate uncertain records to stronger models rather than sending every record to the strongest model.
-6. Checkpoint each step so a retry does not redo completed work. Each run stores a fingerprint of its ordered step-name plan; resumption rejects duplicate names, plan changes and legacy checkpoints whose step order cannot be verified. Use a new run ID after changing a workflow definition.
+6. Checkpoint each step so a retry does not redo completed work. Each run stores a fingerprint of its ordered step-name plan and explicit per-step revision. Increment a step's revision whenever its behavior, prompt, model choice or interpretation changes. Resumption rejects duplicate names, plan/revision changes and legacy checkpoints whose step order cannot be verified. Use a new run ID for intentional workflow changes.
 
 ## Trust boundaries
 

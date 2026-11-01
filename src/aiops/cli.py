@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 from typing import Any
 
+from aiops.diagnostics import collect_diagnostics, diagnostics_failed, render_diagnostics
 from aiops.export.jsonl import write_jsonl
 from aiops.research.import_validation import load_csv_batch
 from aiops.storage.sqlite import SQLiteStore
@@ -77,6 +78,18 @@ def main() -> None:
         default=Path(os.getenv("AIOPS_DB_PATH", "./data/aiops.db")),
     )
 
+    doctor = sub.add_parser(
+        "doctor",
+        help="Run read-only checks for the local environment and SQLite database",
+    )
+    doctor.add_argument(
+        "--db",
+        type=Path,
+        default=Path(os.getenv("AIOPS_DB_PATH", "./data/aiops.db")),
+    )
+    doctor.add_argument("--project-root", type=Path, default=Path.cwd())
+    doctor.add_argument("--json", action="store_true", help="Print machine-readable JSON")
+
     args = parser.parse_args()
 
     if args.command == "validate-jsonl":
@@ -144,6 +157,15 @@ def main() -> None:
     elif args.command == "dataset-count":
         total = SQLiteStore(args.db).count_dataset_records(args.dataset)
         print(total)
+
+    elif args.command == "doctor":
+        checks = collect_diagnostics(args.db, args.project_root)
+        if args.json:
+            print(json.dumps(checks, indent=2, ensure_ascii=False))
+        else:
+            print(render_diagnostics(checks))
+        if diagnostics_failed(checks):
+            raise SystemExit(1)
 
 
 if __name__ == "__main__":

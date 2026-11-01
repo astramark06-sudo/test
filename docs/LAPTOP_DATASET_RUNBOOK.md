@@ -68,6 +68,10 @@ python -m pip install -e ".[dev]"
 Keep the private source bundle in a local directory ignored by Git. Place the importer-compatible CSV exports in one input directory, then run:
 
 ```bash
+# First validate the complete source directory without creating or changing a database:
+python scripts/ingest_research_bundle.py ./data/private/laptop-research-csv --db ./data/laptop_research.sqlite --dry-run
+
+# Only after reviewing a successful dry-run report, perform the import:
 python scripts/ingest_research_bundle.py ./data/private/laptop-research-csv --db ./data/laptop_research.sqlite
 ```
 

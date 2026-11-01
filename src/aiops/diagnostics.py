@@ -1,6 +1,7 @@
 """Read-only diagnostics for local platform setup and database health."""
 from __future__ import annotations
 
+import importlib.metadata
 import importlib.util
 import ipaddress
 import os
@@ -13,17 +14,18 @@ from urllib.parse import urlparse
 
 
 OPTIONAL_MODULES = (
-    ("LiteLLM", "litellm", "llm"),
-    ("LangGraph", "langgraph", "agents"),
-    ("MCP SDK", "mcp", "mcp"),
-    ("Playwright", "playwright", "browser"),
-    ("DuckDB", "duckdb", "data"),
-    ("RapidFuzz", "rapidfuzz", "data"),
-    ("PaddleOCR", "paddleocr", "ocr"),
-    ("OpenCV", "cv2", "ocr"),
-    ("EasyOCR", "easyocr", "ocr-easyocr"),
-    ("Tesseract Python wrapper", "pytesseract", "ocr-tesseract"),
-    ("Langfuse", "langfuse", "observability"),
+    ("LiteLLM", "litellm", "litellm", "llm"),
+    ("LangGraph", "langgraph", "langgraph", "agents"),
+    ("MCP SDK", "mcp", "mcp", "mcp"),
+    ("Playwright", "playwright", "playwright", "browser"),
+    ("DuckDB", "duckdb", "duckdb", "data"),
+    ("RapidFuzz", "rapidfuzz", "rapidfuzz", "data"),
+    ("PaddleOCR", "paddleocr", "paddleocr", "ocr"),
+    ("PaddlePaddle", "paddle", "paddlepaddle", "ocr"),
+    ("OpenCV", "cv2", "opencv-python-headless", "ocr"),
+    ("EasyOCR", "easyocr", "easyocr", "ocr-easyocr"),
+    ("Tesseract Python wrapper", "pytesseract", "pytesseract", "ocr-tesseract"),
+    ("Langfuse", "langfuse", "langfuse", "observability"),
 )
 
 PROJECT_FILES = (
@@ -201,18 +203,32 @@ def collect_diagnostics(
             )
         )
 
-    for label, module, extra in OPTIONAL_MODULES:
+    for label, module, distribution, extra in OPTIONAL_MODULES:
         try:
             available = importlib.util.find_spec(module) is not None
         except (ImportError, ValueError, ModuleNotFoundError):
             available = False
-        checks.append(
-            _check(
-                f"Optional: {label}",
-                "AVAILABLE" if available else "NOT INSTALLED",
-                f"Install with: pip install -e '.[{extra}]'" if not available else "module is discoverable",
-            )
-        )
+        if not available:
+            status = "NOT INSTALLED"
+            detail = f"Install with: pip install -e '.[{extra}]'"
+        else:
+            try:
+                installed_version = importlib.metadata.version(distribution)
+                status = "AVAILABLE"
+                detail = f"version {installed_version}; module is discoverable"
+            except importlib.metadata.PackageNotFoundError:
+                if label == "OpenCV":
+                    try:
+                        installed_version = importlib.metadata.version("opencv-python")
+                        status = "AVAILABLE"
+                        detail = f"version {installed_version} (opencv-python); module is discoverable"
+                    except importlib.metadata.PackageNotFoundError:
+                        status = "AVAILABLE"
+                        detail = "module is discoverable; distribution version unavailable"
+                else:
+                    status = "AVAILABLE"
+                    detail = "module is discoverable; distribution version unavailable"
+        checks.append(_check(f"Optional: {label}", status, detail))
 
     remote_flag = os.getenv("AIOPS_ALLOW_REMOTE_MODELS", "").strip().lower()
     if remote_flag in {"1", "true", "yes", "on"}:
@@ -267,6 +283,35 @@ def collect_diagnostics(
         checks.append(
             _check("n8n encryption key", "PASS", "configured with at least 32 characters; entropy is not assessed and the value is hidden")
         )
+
+    for label, env_name in (
+        ("LM Studio endpoint", "LM_STUDIO_BASE_URL"),
+        ("vLLM endpoint", "VLLM_BASE_URL"),
+        ("llama.cpp endpoint", "LLAMACPP_BASE_URL"),
+    ):
+        endpoint = os.getenv(env_name, "").strip()
+        if not endpoint:
+            checks.append(_check(label, "INFO", "not configured; backend is optional"))
+            continue
+        try:
+            parsed_endpoint = urlparse(endpoint)
+            hostname = parsed_endpoint.hostname
+            is_valid_url = parsed_endpoint.scheme in {"http", "https"} and bool(hostname)
+        except ValueError:
+            hostname = None
+            is_valid_url = False
+        if not is_valid_url:
+            checks.append(_check(label, "FAIL", f"{env_name} is malformed"))
+        elif _is_loopback_host(hostname):
+            checks.append(_check(label, "PASS", "configured loopback endpoint; no connection attempted"))
+        else:
+            checks.append(
+                _check(
+                    label,
+                    "WARN",
+                    "non-loopback host configured; local-only routing will reject it",
+                )
+            )
 
     database = Path(db_path).expanduser()
     if not database.exists():

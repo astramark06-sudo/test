@@ -1,0 +1,10 @@
+workflows:
+  laptop_ocr:
+    steps: [inventory, preprocess, ocr_primary, ocr_secondary, reconcile, extract, validate, export]
+    checkpoint_each_step: true
+  laptop_research:
+    steps: [normalize_identity, lookup_manufacturer, verify_configuration, benchmark_cpu, attach_sources, review_conflicts, export]
+    checkpoint_each_step: true
+  repo_maintenance:
+    steps: [inspect, plan, implement, test, security_scan, commit, verify_ci]
+    checkpoint_each_step: true

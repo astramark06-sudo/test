@@ -7,7 +7,7 @@ Last reviewed: 2026-11-02
 The project uses the PaddleOCR 3.x API, not the legacy 2.x interface.
 
 - **paddleocr>=3.7,<3.8** selects the current 3.7 release line observed on PyPI at review time. The upper bound prevents a future minor API change from silently entering this adapter.
-- **paddlepaddle>=3.2,<4** supplies the Paddle inference runtime. PaddleOCR's current quick start demonstrates PaddlePaddle 3.2.0 for CPU inference and states that PaddleOCR 3.x requires PaddlePaddle 3.0 or newer.
+- **paddlepaddle==3.2.0** supplies the CPU Paddle inference runtime. The project pins the exact version shown by PaddleOCR's current CPU quick start instead of allowing pip to select a newer, unverified PaddlePaddle minor release. PaddleOCR 3.x requires PaddlePaddle 3.0 or newer.
 - **opencv-python-headless>=4.9** supports image preprocessing without GUI dependencies.
 
 The adapter deliberately uses PaddleOCR with engine="paddle" and calls predict(image_path). PaddleOCR 3.x result objects are dict-like; the adapter extracts rec_texts, rec_scores and rec_polys and converts NumPy-like values to ordinary Python values. Missing scores or polygons remain null; they are not fabricated.
@@ -16,9 +16,12 @@ Document orientation classification and document unwarping are disabled so repor
 
 ## CPU and GPU installation
 
-The OCR extra is the CPU-oriented default:
+The OCR extra is the CPU-oriented default. On a supported host, install the PaddlePaddle CPU wheel from the official CPU index first, then install the project extra:
 
+    python -m pip install paddlepaddle==3.2.0 -i https://www.paddlepaddle.org.cn/packages/stable/cpu/
     python -m pip install -e ".[ocr]"
+
+The second command respects the exact 3.2.0 pin and installs PaddleOCR 3.7.x. Use the official installation matrix for platform-specific wheel support; do not force the CPU index onto an unsupported OS/architecture.
 
 Do not install a GPU runtime automatically. PaddlePaddle GPU wheels must match the host operating system, Python version, CUDA version and supported GPU. Use the official PaddlePaddle installation matrix for the exact host before replacing the CPU runtime.
 

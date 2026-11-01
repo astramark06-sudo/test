@@ -59,3 +59,40 @@ This audit does not capture current retail prices. The existing workbook's 195 O
 ## Sources and checking method
 
 Manufacturer product pages/support records and Lenovo PSREF are preferred over retailer aggregators. Dynamic pages may change by region and SKU. A manufacturer page can prove that a configuration exists while still not proving that an OCR row refers to that exact part number. The workbook should retain the distinction among exact SKU, model number, model family, platform-only and unresolved identities.
+
+
+## 6. Samsung Galaxy Book4 — NP750XGJ-LG9IN
+
+**Official source:** Samsung India, Galaxy Book4 15.6-inch, Core i3 / 8GB / 512GB  
+https://www.samsung.com/in/computers/galaxy-book/galaxy-book4-15-6-inch-13th-i3-8gb-512gb-np750xgj-lg9in/
+
+Samsung's India page identifies the exact product code NP750XGJ-LG9IN with Intel Core i3-1315U, 8GB onboard LPDDR4x, 512GB NVMe SSD, and a 15.6-inch FHD IPS anti-glare display.
+
+**Disposition:** This is an exact manufacturer SKU/configuration reference. Match the OCR candidate to it only where the model name, CPU and 8GB/512GB configuration agree; retain the Samsung part code as the identifier. The memory is onboard, not a removable SO-DIMM.
+
+## 7. ASUS Vivobook Go 15 — E1504F family, Ryzen 5 7520U / Ryzen 3 7320U
+
+**Official source:** ASUS India technical specifications  
+https://www.asus.com/in/laptops/for-home/vivobook/vivobook-go-15-oled-e1504f/techspec/
+
+ASUS lists both Ryzen 5 7520U and Ryzen 3 7320U configurations in this family. The 8GB variants use onboard LPDDR5 with a maximum total system memory of 8GB; the page also lists 512GB M.2 NVMe PCIe 3.0 storage options. The family's display options include ordinary FHD anti-glare and materially different OLED options. Do not assign the OLED panel to an OCR record that only says FHD.
+
+**Disposition:** This source can support the CPU/memory/storage/platform facts when the exact E1504F family and configuration are confirmed. It does not prove that a generic “Vivobook Go 15” screenshot is a specific part number or has the OLED option.
+
+## 8. Lenovo V15 G4 AMN — Ryzen 3 7320U, 8GB / 512GB
+
+**Official source:** Lenovo PSREF, V15 G4 AMN, machine type/model 83CQ000BIN  
+https://psref.lenovo.com/Detail/Lenovo_V15_G4_AMN?M=83CQ000BIN
+
+This exact PSREF record specifies Ryzen 3 7320U (4C/8T), integrated Radeon 610M, 8GB soldered LPDDR5-5500 dual-channel memory with no memory slots and no upgrade path, 512GB M.2 2242 PCIe 4.0x4 NVMe SSD, 15.6-inch FHD TN 250-nit anti-glare display, 38Wh battery and non-backlit keyboard.
+
+**Suffix warning:** Another V15 G4 AMN MTM (for example, 83CQ000NIN) is a distinct part-number record and must be checked separately. Do not copy the 83CQ000BIN specification set to an OCR listing without the machine type/model.
+
+## 9. MSI Modern 14 C7M — Ryzen 5 7430U, 16GB / 512GB
+
+**Official source:** MSI India, Modern 14 C7X family specification comparison  
+https://in.msi.com/Business-Productivity/Modern-14-C7X/Specification
+
+MSI's own variant comparison lists Modern 14 C7M-400IN with Ryzen 5 7430U, 16GB DDR4-3200 onboard memory and 512GB NVMe PCIe Gen3 SSD. The same page lists other C7M SKUs with different CPUs and memory sizes, including 8GB variants for other CPU options.
+
+**Disposition:** The existing research row that combines Ryzen 5 7430U with 8GB/512GB has an explicit manufacturer-spec conflict: C7M-400IN is 16GB. Do not silently change the OCR 8GB value or claim C7M-400IN is the exact listing. The CPU/family match is not enough; exact SKU or seller configuration evidence is required.

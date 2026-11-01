@@ -25,3 +25,12 @@ def test_conflicting_engine_outputs_are_preserved_and_flagged():
 def test_empty_outputs_require_review():
     result = reconcile_text({"engine_a": []})
     assert result["review_required"] is True
+
+
+def test_missing_engine_output_requires_review_even_with_one_reading():
+    result = reconcile_text({
+        "engine_a": [{"text": "Dell Latitude 5420"}],
+        "engine_b": [],
+    })
+    assert result["consensus_text"] == "Dell Latitude 5420"
+    assert result["review_required"] is True

@@ -173,6 +173,84 @@ class SQLiteStore:
             sql += " GROUP BY model,tier ORDER BY total_tokens DESC"
             return [dict(row) for row in con.execute(sql, args).fetchall()]
 
+    def import_dataset_batches(
+        self,
+        batches: list[dict[str, Any]],
+        sources: list[dict[str, Any]] | None = None,
+    ) -> dict[str, dict[str, int]]:
+        """Atomically import multiple datasets and their source-index records.
+
+        Each batch must contain dataset, rows, key_field and source_file. All
+        dataset upserts and source-index updates share one SQLite transaction,
+        so a failure cannot leave a partially imported bundle.
+        """
+        import hashlib
+
+        imported: dict[str, int] = {}
+        with self.connect() as con:
+            for batch in batches:
+                dataset = str(batch["dataset"])
+                rows = batch["rows"]
+                key_field = batch.get("key_field")
+                source_file = batch.get("source_file")
+                for row in rows:
+                    if key_field:
+                        record_key = str(row[key_field])
+                    else:
+                        canonical = json.dumps(
+                            row, sort_keys=True, ensure_ascii=False
+                        )
+                        record_key = hashlib.sha256(
+                            canonical.encode("utf-8")
+                        ).hexdigest()
+                    con.execute(
+                        """INSERT INTO dataset_records(
+                            dataset,record_key,source_file,payload_json
+                        ) VALUES(?,?,?,?) ON CONFLICT(dataset,record_key) DO UPDATE SET
+                        source_file=excluded.source_file,
+                        payload_json=excluded.payload_json,
+                        imported_at=CURRENT_TIMESTAMP""",
+                        (
+                            dataset,
+                            record_key,
+                            source_file,
+                            json.dumps(row, ensure_ascii=False),
+                        ),
+                    )
+                    imported[dataset] = imported.get(dataset, 0) + 1
+
+            for source in sources or []:
+                con.execute(
+                    """INSERT INTO sources(
+                        uri,title,source_type,retrieved_at,claims_json,metadata_json
+                    ) VALUES(?,?,?,CURRENT_TIMESTAMP,?,?)
+                    ON CONFLICT(uri) DO UPDATE SET
+                    title=excluded.title,
+                    source_type=excluded.source_type,
+                    retrieved_at=CURRENT_TIMESTAMP,
+                    claims_json=excluded.claims_json,
+                    metadata_json=excluded.metadata_json""",
+                    (
+                        source["uri"],
+                        source.get("title"),
+                        source.get("source_type"),
+                        json.dumps(source.get("claims") or [], ensure_ascii=False),
+                        json.dumps(source.get("metadata") or {}, ensure_ascii=False),
+                    ),
+                )
+
+            result = {}
+            for dataset, rows_imported in imported.items():
+                row = con.execute(
+                    "SELECT COUNT(*) AS n FROM dataset_records WHERE dataset=?",
+                    (dataset,),
+                ).fetchone()
+                result[dataset] = {
+                    "rows_imported": rows_imported,
+                    "stored_rows_after_import": int(row["n"]),
+                }
+            return result
+
     def upsert_dataset_records(self, dataset: str, rows: list[dict[str, Any]],
                                key_field: str | None = None, source_file: str | None = None) -> int:
         """Import structured rows while retaining the complete original row as JSON."""

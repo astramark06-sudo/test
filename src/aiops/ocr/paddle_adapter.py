@@ -68,7 +68,9 @@ def run_paddle_ocr(image_path: str, language: str = "en") -> list[dict[str, Any]
 
     for page in results or []:
         payload = _result_mapping(page)
-        texts = payload.get("rec_texts") or []
+        texts = payload.get("rec_texts")
+        if texts is None:
+            texts = []
         scores = payload.get("rec_scores")
         polygons = payload.get("rec_polys")
         if polygons is None:

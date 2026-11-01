@@ -160,3 +160,59 @@ https://www.savekarloo.com/product/thomson-141-inch-3k-high-resolution-display-i
 A retailer-style product page associates model IN-K14C with Intel Celeron N5100, 8GB LPDDR4, 256GB SSD and a 14.1-inch 3000×2000 QHD+ display. No sufficiently authoritative current manufacturer datasheet was identified in this audit.
 
 **Disposition:** This may be used as a low-confidence research lead only. The workbook's NEO 3K family row should retain OCR-sourced display/storage facts and clearly label every detail obtained from this secondary page. Do not elevate it to verified SKU status without a manufacturer model sheet or service manual.
+
+
+## 16. ASUS Vivobook 15 — X1504VA-BQ331WS, Core i3-1315U, 12GB / 512GB
+
+**ASUS Store India product detail (page states AYR Technologies is the authorized reseller):**  
+https://in.store.asus.com/light-weight-laptop-asus-vivobook-15-x1504va-bq331ws.html
+
+The listing names model X1504VA-BQ331WS and part number 90NB10J2-M047B0. It specifies Core i3-1315U (6C/8T), 12GB DDR4 as 8GB onboard + 4GB SO-DIMM, one SO-DIMM slot and stated expansion up to 16GB, 512GB M.2 NVMe PCIe 4.0 SSD, 15.6-inch FHD IPS-level 250-nit display, Windows 11 Home, 42Wh battery, 1.70kg and backlit keyboard.
+
+**Disposition:** This is a strong exact-configuration lead for the existing ASUS Vivobook 15 i3-1315U / 12GB / 512GB configuration row. The page gives a specific model and part number, but an OCR candidate is only an exact SKU match if the screenshot or original seller record independently shows X1504VA-BQ331WS or part 90NB10J2-M047B0. The web page's offer/price block is commercial and intentionally not copied into OCR price fields.
+
+## 17. Acer Aspire 3 — A324-53 / UN.34RSI.021, Core i3-1315U, 8GB / 512GB
+
+**Acer India Official Store indexed product specification:**  
+https://store.acer.com/en-in/500gb-ssd-laptop/processor_type-coretm_i3
+
+Acer's India store search/indexed product detail identifies Aspire 3 A324-53, reference UN.34RSI.021, with Core i3-1315U, 8GB DDR4 expandable up to 32GB, 512GB PCIe Gen3 NVMe, 14-inch FHD IPS, Intel UHD Graphics, Windows 11 Home and 1.45kg. The current category page no longer renders the product card in its regular HTML, so the indexed product data is preserved as evidence but the direct live page should be rechecked before treating it as a currently orderable SKU.
+
+**Disposition:** This is a strong product/configuration match candidate for an Acer Aspire 3 i3-1315U / 8GB / 512GB 14-inch OCR listing, but not an exact listing match without A324-53 / UN.34RSI.021 on the original evidence. Do not use its 14-inch display details for the separate 15.6-inch Aspire 3 listing.
+
+## 18. Lenovo IdeaPad 1 15ALC7 — 82R400DUFE, Ryzen 5 5500U, 8GB / 512GB
+
+**Lenovo PSREF exact machine type/model:**  
+https://psref.lenovo.com/Detail/1804?M=82R400DUFE
+
+The PSREF indexed record identifies IdeaPad 1 15ALC7 MTM 82R400DUFE with Ryzen 5 5500U (6C/12T), 8GB soldered DDR4-3200, one additional SO-DIMM slot, 512GB M.2 2242 PCIe Gen4x4 NVMe SSD, Radeon integrated graphics and a 42Wh battery. The platform allows different memory totals and panel variants, so do not assume an upgrade is fitted merely because the slot exists.
+
+**Disposition:** This is a strong exact configuration candidate for the existing Lenovo IdeaPad 1 Ryzen 5 5500U / 8GB / 512GB row. The screenshot still needs the 82R400DUFE MTM before this specific unit's panel, OS, warranty or installed RAM topology can be asserted. Other IdeaPad 1 15ALC7 MTMs can have different memory and screen configurations.
+
+## 19. Acer Aspire 15 / Aspire 3 — Ryzen 7 7730U, 16GB / 512GB
+
+**Acer India Official Store sources:**
+- Aspire 15 AS15-42, ref. UN.35MSI.012: https://store.acer.com/en-in/laptops/student-laptop/processor_type-ryzentm_7
+- Aspire 3 A325-42, ref. UN.37GSI.009: https://store.acer.com/en-in/acer-aspire-3-amd-ryzen-r7-7730u-processor-windows-11-home-16-gb-ram-512-gb-ssd-15-6-39-62-cm-display-steel-grey-a325-42-1-79-kg-thin-and-light-laptop
+
+Acer's store lists both an Aspire 15 AS15-42 and an Aspire 3 A325-42 with Ryzen 7 7730U, 16GB DDR4, 512GB NVMe and 15.6-inch FHD IPS display. The indexed details differ in product reference and some physical/configuration fields: the AS15-42 reference is UN.35MSI.012, while the A325-42 reference is UN.37GSI.009; both advertise upgrade support up to 32GB, but exact memory topology should be checked on the individual page.
+
+**Disposition:** The OCR/configuration register's Acer Aspire 15 / R7-7730U / 16GB / 512GB row has a strong official family/configuration match to AS15-42. Acer also sells an Aspire 3 with the same CPU/RAM/storage, so processor and memory alone do not distinguish the model. Require the family name and reference code before assigning the full configuration.
+
+## 20. Dell Pro 15 Essential — PV15250, Core 3 100U, 8GB / 512GB
+
+**Dell India official technical specification page:**  
+https://www.dell.com/en-in/shop/laptop-notebook-computers/dell-pro-15-essential-laptop/spd/dell-pro-pv15250-laptop
+
+The Dell page lists Intel Core 3 100U (6C/8T), Windows 11 Pro/Home variants and Ubuntu 22.04, Intel integrated graphics, 15.6-inch FHD IPS anti-glare 250-nit 45% NTSC display, 8GB (1x8GB) DDR4-4400 for the data-only USB-C chassis option, and 512GB M.2 2230 PCIe NVMe storage. It also lists other CPU, RAM and storage combinations. The page says it cannot be purchased online and requires a callback.
+
+**Disposition:** This is a strong model-family/configuration reference for the existing Dell Pro Essential 15 Core 3 100U / 8GB / 512GB entry. The display, memory speed and port configuration depend on chassis/USB-C variant; record the exact chassis/part number before assigning those variant details. This source does not show that a generic Dell 15 / Core 3 100U OCR row is necessarily the PV15250.
+
+## 21. Lenovo IdeaPad 3i Gen 7 — 82RKXA11IN, i5-1235U, 16GB / 512GB
+
+**Lenovo India Outlet product record:**  
+https://www.lenovo.com/in/outletin/en/p/laptops/ideapad/ideapad-s-series/ideapad-3i-gen-7-15-inch-intel/82rkxa11in
+
+This Lenovo outlet product record identifies part number 82RKXA11IN as an IdeaPad 3i Gen 7, Core i5-1235U, 16GB DDR4-3200 (8GB soldered + 8GB SO-DIMM), 512GB PCIe Gen3 SSD, 15.6-inch FHD TN 250-nit display, Windows 11 Home, and backlit keyboard. It is explicitly marked certified refurbished.
+
+**Disposition:** This proves an official Lenovo India outlet listing with the CPU/RAM/storage combination exists, but it must not be used to identify an OCR listing as new or as a different IdeaPad Slim 3 model. Treat it as a refurbished SKU lead only; confirm the part number and product condition before matching.

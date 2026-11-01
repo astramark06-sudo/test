@@ -76,6 +76,8 @@ Playwright MCP setup: https://playwright.dev/docs/getting-started-mcp. The offic
     aiops dataset-count candidates
     aiops usage-report
 
+When using `ModelRouter.complete`, pass `usage_store=SQLiteStore(...)` and a stable `run_id` to record observed prompt/completion tokens and LiteLLM-reported response cost. Usage recording is opt-in; calls without a store do not create ledger entries.
+
 ## Data safety
 
 The public repo excludes data/, artifacts/, local DBs, environment files and secrets. Keep private OCR images and generated workbooks outside GitHub. CI runs Ruff and pytest across Python 3.10, 3.11, 3.12 and 3.13. CodeQL scans Python code on main changes, pull requests and a weekly schedule; review findings under the repository Security tab. Model weights and browser downloads are excluded.

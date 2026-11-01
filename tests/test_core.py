@@ -287,7 +287,7 @@ def test_workflow_rejects_blank_step_revision(tmp_path: Path):
         ("ollama_chat/qwen2.5:7b", "OLLAMA_BASE_URL", "http://127.0.0.1:11434"),
         ("lm_studio/qwen", "LM_STUDIO_BASE_URL", "http://127.0.0.1:1234/v1"),
         ("vllm/qwen", "VLLM_BASE_URL", "http://127.0.0.2:8000/v1"),
-        ("llamacpp/qwen", "LLAMACPP_BASE_URL", "http://localhost:8080/v1"),
+        ("custom_openai/qwen", "CUSTOM_OPENAI_BASE_URL", "http://localhost:8080/v1"),
     ],
 )
 def test_model_router_passes_configured_loopback_endpoint_to_litellm(
@@ -315,3 +315,12 @@ def test_model_router_passes_configured_loopback_endpoint_to_litellm(
     assert response == {"ok": True}
     assert calls["api_base"] == endpoint
     assert calls["model"] == model
+
+
+
+def test_model_router_blocks_non_native_llamacpp_prefix():
+    with pytest.raises(ModelNotConfigured):
+        ModelRouter(
+            {"fast": "llamacpp/qwen"},
+            allow_remote=False,
+        ).select("fast")

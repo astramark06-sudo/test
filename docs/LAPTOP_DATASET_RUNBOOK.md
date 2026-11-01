@@ -1,5 +1,7 @@
 # Laptop Research Dataset Runbook
 
+> Current platform/security state and final data-analysis handoff: [Operator State — 2026-11-02](OPERATOR_STATE_2026-11-02.md). Follow the saved baseline checklist before producing any new workbook/database version.
+
 This runbook separates the saved, read-only research snapshot from the canonical platform importer. It is designed for repeatable local operations without publishing private OCR evidence.
 
 ## Current evidence baseline
@@ -96,6 +98,8 @@ The importer recognises these source filenames when present:
 
 The importer reports each expected file as imported or missing. Missing optional files are not treated as zero-record datasets. If both the plain and enriched candidate-register exports are present, the enriched file is imported second and upserts the same candidate IDs; use it only when it contains the intended superset of source fields.
 
+The generic CLI command `aiops ingest-csv` now also runs the strict shared CSV preflight before database creation/write. The CI matrix verifies that the package builds and both `aiops --help` and the read-only doctor smoke test run successfully on all supported Python versions.
+
 The importer now preflights every present CSV before opening the target database for writes. It rejects missing key headers, blank/whitespace-padded keys, duplicate stable keys, duplicate headers and malformed row widths. Keyless tables report exact duplicate-content rows because hash-key imports would otherwise collapse identical rows. The importer requires at least one recognised CSV file and stops before database writes if any present file fails preflight. Import outcomes are reported per source filename, so the plain and enriched candidate CSVs cannot overwrite each other's report entries when both are present. When both candidate-register files are supplied, preflight also requires the enriched export to retain every raw-register column and exactly the same Candidate_ID set; otherwise import stops before any database writes. The full bundle is written inside one SQLite transaction, including source-index rows, and rolls back as a unit if a write fails.
 
 After import, inspect counts (dataset names are the left-hand values in the import report):
@@ -123,6 +127,16 @@ Before promoting any later workbook/database revision, verify:
 - The clipped Tesseract coverage gap remains explicitly flagged until the source pixels support a product identity.
 - Spreadsheet read-back validates sheet names, row counts, formulas/links and key columns; database QA validates dataset counts and source links.
 - Final outputs have SHA-256 checksums. Keep the checksum manifest beside the private deliverables.
+
+## Host preflight
+
+After installing the project on the actual host, run:
+
+```bash
+aiops doctor --project-root . --db ./data/aiops.db --json
+```
+
+This is a read-only command. It reports host OS/architecture, logical CPU count, physical RAM where available, free disk space and GPU inventory-tool availability. It does not execute GPU tools; confirm exact GPU and VRAM manually. Do not install Ollama or download model weights until the host resources are known. The current repository CI already verifies the wheel build, package dependency consistency, tests and CLI entry points on Python 3.10–3.13.
 
 ## Boundary between completed and pending deployment
 

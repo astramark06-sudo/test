@@ -18,3 +18,12 @@ artifacts/**
 *.sqlite*
 *.log
 .DS_Store
+
+# Private local research and export folders
+private-data/**
+source-evidence/**
+local-deliverables/**
+
+# Spreadsheet deliverables belong in private storage, not this public repository
+*.xlsx
+*.xls

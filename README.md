@@ -65,6 +65,7 @@ Playwright MCP setup: https://playwright.dev/docs/getting-started-mcp. The offic
 
     aiops doctor
     aiops doctor --json
+    aiops backup-db ./backups/aiops-YYYYMMDD.sqlite --db ./data/aiops.db
     aiops init-db
     aiops csv-to-jsonl data/candidates.csv artifacts/candidates.jsonl
     aiops validate-jsonl artifacts/candidates.jsonl
@@ -87,6 +88,8 @@ Import CSV datasets into SQLite without dropping source columns. Original row co
 `aiops doctor` performs read-only host checks: OS/architecture, logical CPU count, physical RAM where the OS exposes it, free disk space, GPU inventory-tool availability, Python and SQLite versions, optional integration modules, project configuration-file presence, remote-model opt-in state, Ollama endpoint locality, n8n encryption-key readiness without exposing the key, and an existing SQLite database's quick integrity check. It does not contact external services, read or print secret values, create directories, or modify the database. Run it from the project root before enabling optional components.
 
 Before creating or writing to the SQLite database, `aiops ingest-csv` validates the complete CSV: it requires a header, rejects empty or duplicate column names, checks every row width, and validates a supplied stable-key column for missing, blank, whitespace-padded or duplicate values. Keyless imports use deterministic row-content hashes; exact duplicate-content rows are reported because identical rows share one stored key. A failed preflight leaves the target database untouched.
+
+`aiops backup-db OUTPUT --db SOURCE` uses SQLite's online backup API, opens the source read-only, checks the finished copy with `PRAGMA integrity_check`, then atomically places it at the destination. Existing destinations are refused unless `--overwrite` is supplied; a failed backup leaves the existing destination unchanged.
 
 Dataset import is idempotent for a stable key field. Private datasets stay local and are excluded from Git.
 

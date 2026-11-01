@@ -1,6 +1,7 @@
 """Task-tier model routing via LiteLLM with local-only safety defaults."""
 from __future__ import annotations
 
+import ipaddress
 import os
 from enum import Enum
 from typing import Any
@@ -17,15 +18,32 @@ class ModelNotConfigured(RuntimeError):
     """Raised when a model is missing or violates configured routing policy."""
 
 
-LOCAL_MODEL_PREFIXES = (
-    "ollama/",
-    "ollama_chat/",
-    "lm_studio/",
-    "vllm/",
-    "hosted_vllm/",
-    "llamacpp/",
-    "local/",
-)
+# Non-Ollama local backends require an explicit endpoint. This prevents a
+# provider's implicit/default URL from bypassing the local-only policy.
+_LOCAL_BACKENDS = {
+    "ollama/": ("OLLAMA_BASE_URL", "http://localhost:11434"),
+    "ollama_chat/": ("OLLAMA_BASE_URL", "http://localhost:11434"),
+    "lm_studio/": ("LM_STUDIO_BASE_URL", None),
+    "vllm/": ("VLLM_BASE_URL", None),
+    "llamacpp/": ("LLAMACPP_BASE_URL", None),
+}
+LOCAL_MODEL_PREFIXES = tuple(_LOCAL_BACKENDS)
+
+
+def _is_loopback_endpoint(value: Any) -> bool:
+    """Return True only for an explicit HTTP(S) URL with a loopback host."""
+    if not isinstance(value, str) or not value.strip():
+        return False
+    parsed = urlparse(value.strip())
+    if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+        return False
+    host = parsed.hostname.casefold().rstrip(".")
+    if host == "localhost":
+        return True
+    try:
+        return ipaddress.ip_address(host).is_loopback
+    except ValueError:
+        return False
 
 
 class ModelRouter:
@@ -56,16 +74,31 @@ class ModelRouter:
             )
 
         if not self.allow_remote:
-            if not model.startswith(LOCAL_MODEL_PREFIXES):
+            backend = next(
+                (
+                    (prefix, endpoint_env, default)
+                    for prefix, (endpoint_env, default) in _LOCAL_BACKENDS.items()
+                    if model.startswith(prefix)
+                ),
+                None,
+            )
+            if backend is None:
                 raise ModelNotConfigured(
-                    "Only configured local model backends are allowed. "
-                    "Set AIOPS_ALLOW_REMOTE_MODELS=true only when provider charges are accepted."
+                    "Only approved local model backends are allowed. "
+                    "Set AIOPS_ALLOW_REMOTE_MODELS=true only when provider charges "
+                    "and data handling are explicitly accepted."
                 )
-            endpoint = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-            host = urlparse(endpoint).hostname
-            if host not in {"localhost", "127.0.0.1", "::1"}:
+
+            prefix, endpoint_env, default = backend
+            endpoint = os.getenv(endpoint_env, default or "").strip()
+            if not endpoint:
                 raise ModelNotConfigured(
-                    "Non-loopback model endpoint blocked in local-only mode."
+                    f"Local backend '{prefix}' requires {endpoint_env} to be set "
+                    "to a loopback URL."
+                )
+            if not _is_loopback_endpoint(endpoint):
+                raise ModelNotConfigured(
+                    f"Non-loopback {endpoint_env} endpoint blocked in local-only mode."
                 )
         return model
 
@@ -77,6 +110,14 @@ class ModelRouter:
         **kwargs: Any,
     ) -> Any:
         model = self.select(tier)
+        if not self.allow_remote:
+            for endpoint_key in ("api_base", "base_url"):
+                endpoint = kwargs.get(endpoint_key)
+                if endpoint is not None and not _is_loopback_endpoint(endpoint):
+                    raise ModelNotConfigured(
+                        f"Non-loopback {endpoint_key} override blocked in local-only mode."
+                    )
+
         try:
             from litellm import completion
         except ImportError as exc:

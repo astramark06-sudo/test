@@ -11,6 +11,7 @@ from typing import Any
 from aiops.config import load_environment
 from aiops.diagnostics import collect_diagnostics, diagnostics_failed, render_diagnostics
 from aiops.export.jsonl import write_jsonl
+from aiops.manifest import build_manifest, verify_manifest
 from aiops.research.import_validation import load_csv_batch
 from aiops.storage.backup import backup_database
 from aiops.storage.sqlite import SQLiteStore
@@ -80,6 +81,20 @@ def main() -> None:
         type=Path,
         default=Path(os.getenv("AIOPS_DB_PATH", "./data/aiops.db")),
     )
+
+    hash_tree = sub.add_parser(
+        "hash-tree",
+        help="Create a deterministic SHA-256 manifest of a directory",
+    )
+    hash_tree.add_argument("directory", type=Path)
+    hash_tree.add_argument("output", type=Path)
+
+    verify_tree = sub.add_parser(
+        "verify-manifest",
+        help="Verify a directory against a SHA-256 manifest",
+    )
+    verify_tree.add_argument("directory", type=Path)
+    verify_tree.add_argument("manifest", type=Path)
 
     backup = sub.add_parser(
         "backup-db",
@@ -177,6 +192,16 @@ def main() -> None:
     elif args.command == "dataset-count":
         total = SQLiteStore(args.db).count_dataset_records(args.dataset)
         print(total)
+
+    elif args.command == "hash-tree":
+        manifest_path = build_manifest(args.directory, args.output)
+        print(f"SHA-256 manifest created: {manifest_path}")
+
+    elif args.command == "verify-manifest":
+        report = verify_manifest(args.directory, args.manifest)
+        print(json.dumps(report, indent=2, ensure_ascii=False))
+        if not report["valid"]:
+            raise SystemExit(1)
 
     elif args.command == "backup-db":
         destination = backup_database(

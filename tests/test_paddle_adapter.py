@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import sys
-from types import ModuleType, SimpleNamespace
+from types import ModuleType
 
 from aiops.ocr.paddle_adapter import run_paddle_ocr
 
@@ -12,6 +12,12 @@ class ArrayLike:
 
     def tolist(self):
         return self.values
+
+    def __len__(self):
+        return len(self.values)
+
+    def __getitem__(self, index):
+        return self.values[index]
 
 
 def test_paddleocr_37_adapter_normalizes_text_scores_and_polygons(monkeypatch):

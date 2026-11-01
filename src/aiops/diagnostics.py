@@ -287,7 +287,7 @@ def collect_diagnostics(
     for label, env_name in (
         ("LM Studio endpoint", "LM_STUDIO_BASE_URL"),
         ("vLLM endpoint", "VLLM_BASE_URL"),
-        ("llama.cpp endpoint", "LLAMACPP_BASE_URL"),
+        ("OpenAI-compatible local endpoint", "CUSTOM_OPENAI_BASE_URL"),
     ):
         endpoint = os.getenv(env_name, "").strip()
         if not endpoint:

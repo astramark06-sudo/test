@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from aiops.export.jsonl import write_jsonl
+from aiops.research.import_validation import load_csv_batch
 from aiops.storage.sqlite import SQLiteStore
 
 
@@ -118,15 +119,27 @@ def main() -> None:
         print(json.dumps(summary, indent=2, ensure_ascii=False))
 
     elif args.command == "ingest-csv":
-        rows = read_csv(args.input)
+        # Validate the complete CSV before constructing a database store or
+        # writing any rows. This gives the generic CLI the same structural and
+        # stable-key safeguards as the multi-file research-bundle importer.
+        try:
+            batch = load_csv_batch(args.input, args.key_field)
+        except ValueError as exc:
+            raise SystemExit(f"CSV preflight failed: {exc}") from exc
+
         store = SQLiteStore(args.db)
         imported = store.upsert_dataset_records(
             args.dataset,
-            rows,
+            batch.rows,
             args.key_field,
             str(args.input),
         )
-        print(f"Imported {imported} rows into dataset '{args.dataset}'")
+        print(f"Imported {imported} source rows into dataset '{args.dataset}'")
+        if batch.duplicate_content_rows:
+            print(
+                f"Notice: {batch.duplicate_content_rows} exact duplicate-content "
+                "row(s) share a deterministic hash key in this dataset."
+            )
 
     elif args.command == "dataset-count":
         total = SQLiteStore(args.db).count_dataset_records(args.dataset)

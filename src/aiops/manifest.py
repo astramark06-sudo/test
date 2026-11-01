@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import tempfile
 from pathlib import Path, PurePosixPath
 from typing import Any
@@ -94,6 +95,8 @@ def verify_manifest(
     except (OSError, UnicodeError, json.JSONDecodeError) as exc:
         raise ValueError(f"Could not read manifest {manifest_file}: {exc}") from exc
 
+    if not isinstance(manifest, dict):
+        raise ValueError("Manifest root must be an object")
     if manifest.get("schema_version") != SCHEMA_VERSION:
         raise ValueError("Unsupported manifest schema version")
     if manifest.get("algorithm") != "sha256":
@@ -110,8 +113,20 @@ def verify_manifest(
         if not isinstance(relative, str) or not relative:
             raise ValueError("Manifest entry has an invalid path")
         pure = PurePosixPath(relative)
-        if pure.is_absolute() or ".." in pure.parts or "." in pure.parts:
+        if (
+            pure.is_absolute()
+            or "\\" in relative
+            or ".." in pure.parts
+            or "." in pure.parts
+            or pure.as_posix() != relative
+        ):
             raise ValueError(f"Unsafe manifest path: {relative!r}")
+        size = entry.get("size_bytes")
+        digest = entry.get("sha256")
+        if type(size) is not int or size < 0:
+            raise ValueError(f"Invalid file size for manifest path: {relative}")
+        if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
+            raise ValueError(f"Invalid SHA-256 value for manifest path: {relative}")
         if relative in expected:
             raise ValueError(f"Duplicate manifest path: {relative}")
         expected[relative] = entry

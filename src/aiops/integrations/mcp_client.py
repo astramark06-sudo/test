@@ -3,9 +3,11 @@ from __future__ import annotations
 import json, os
 from pathlib import Path
 from typing import Any
+from aiops.config import load_environment
 
 class MCPRegistry:
     def __init__(self, config_path: str | Path) -> None:
+        load_environment()
         self.path=Path(config_path)
         self.config=json.loads(self.path.read_text(encoding="utf-8"))
         self.servers=self.config.get("mcpServers",{})

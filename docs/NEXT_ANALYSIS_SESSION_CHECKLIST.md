@@ -113,6 +113,7 @@ For the new workbook revision:
 ## 6. SQLite update and migration safety
 
 - Use a new database copy for the next import; do not mutate the only saved snapshot.
+- Before import, create a verified backup using `aiops backup-db ./backups/laptop-before-import.sqlite --db ./data/laptop_research.sqlite`; use a separate working copy as the write target.
 - Record hashes of the database, import CSVs and workbook before importing.
 - Run importer mappings from `scripts/ingest_research_bundle.py` and save the import report.
 - Do not place both plain and enriched candidate-register CSVs in the same batch unless enriched is intentionally the full superset; the later import upserts the same candidate IDs.

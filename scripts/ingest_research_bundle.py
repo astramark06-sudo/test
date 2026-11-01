@@ -93,23 +93,15 @@ def main() -> None:
         return
 
     store = SQLiteStore(args.db)
+    database_batches = []
+    source_records = []
     for filename, dataset, key_field, path, batch, file_report in batches:
-        imported = store.upsert_dataset_records(
-            dataset, batch.rows, key_field, str(path)
-        )
-        file_report.update({
-            "status": "imported",
-            "rows_imported": imported,
-            "stored_rows_after_import": store.count_dataset_records(dataset),
+        database_batches.append({
+            "dataset": dataset,
+            "rows": batch.rows,
+            "key_field": key_field,
+            "source_file": str(path),
         })
-        dataset_report = report["datasets"][dataset]
-        dataset_report["status"] = "imported"
-        dataset_report["rows_imported"] += imported
-        dataset_report["rows"] = dataset_report["rows_imported"]
-        dataset_report["stored_rows_after_import"] = store.count_dataset_records(dataset)
-        if dataset not in dataset_report.setdefault("imported_source_files", []):
-            dataset_report["imported_source_files"].append(filename)
-
         if dataset in {"research_sources", "manufacturer_spec_sources", "verified_official_specs"}:
             for row in batch.rows:
                 url = row.get("URL") or row.get("Official_source_URL")
@@ -124,13 +116,31 @@ def main() -> None:
                     row.get("Storage") or "",
                     row.get("Display") or "",
                 ]
-                source_type = row.get("Source type") or "Manufacturer specification"
-                title = row.get("Source title") or row.get("Model_family_or_SKU")
-                store.record_source(
-                    url, title, source_type,
-                    [claim for claim in claims if claim],
-                    {"source_file": filename, **row},
-                )
+                source_records.append({
+                    "uri": url,
+                    "title": row.get("Source title") or row.get("Model_family_or_SKU"),
+                    "source_type": row.get("Source type") or "Manufacturer specification",
+                    "claims": [claim for claim in claims if claim],
+                    "metadata": {"source_file": filename, **row},
+                })
+
+    # Dataset rows and the source index commit in one SQLite transaction.
+    # If any row or source record fails, SQLiteStore rolls the complete bundle back.
+    stored = store.import_dataset_batches(database_batches, source_records)
+    for filename, dataset, key_field, path, batch, file_report in batches:
+        file_report.update({
+            "status": "imported",
+            "rows_imported": len(batch.rows),
+            "stored_rows_after_import": stored[dataset]["stored_rows_after_import"],
+        })
+        dataset_report = report["datasets"][dataset]
+        dataset_report["status"] = "imported"
+        dataset_report["rows_imported"] += len(batch.rows)
+        dataset_report["rows"] = dataset_report["rows_imported"]
+        dataset_report["stored_rows_after_import"] = stored[dataset]["stored_rows_after_import"]
+        if filename not in dataset_report.setdefault("imported_source_files", []):
+            dataset_report["imported_source_files"].append(filename)
+    report["source_records_upserted"] = len(source_records)
     print(json.dumps(report, indent=2, ensure_ascii=False))
 
 

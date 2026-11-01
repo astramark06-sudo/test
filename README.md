@@ -34,11 +34,11 @@ Core storage, workflow, matching, and JSONL export functions need only Python an
 
 ## Model routing and token efficiency
 
-Set AIOPS_MODEL_FAST, AIOPS_MODEL_STRONG and AIOPS_MODEL_DEEP in .env to LiteLLM model IDs. Hosted providers are blocked by default; explicitly set AIOPS_ALLOW_REMOTE_MODELS=true only when you accept possible provider charges. configs/litellm.config.example.yaml shows local Ollama routes. A router cannot add model context length or increase account/provider quota. The platform improves effective context use through retrieval, compact intermediate state, durable memory and checkpointing. AIOPS_MAX_TOKENS limits each completion request; it is not a token entitlement.
+Set AIOPS_MODEL_FAST, AIOPS_MODEL_STRONG and AIOPS_MODEL_DEEP in .env to LiteLLM model IDs. Hosted providers are blocked by default. Local-only mode accepts `ollama/` and `ollama_chat/` using `OLLAMA_BASE_URL` (default `http://localhost:11434`); `lm_studio/`, `vllm/` and `llamacpp/` require `LM_STUDIO_BASE_URL`, `VLLM_BASE_URL` or `LLAMACPP_BASE_URL`. Every configured or per-call `api_base` / `base_url` must resolve to a loopback host. `hosted_vllm/` is not treated as local. Set `AIOPS_ALLOW_REMOTE_MODELS=true` only when provider charges and data handling are explicitly accepted; this opts out of the local-only boundary. A router cannot add model context length or increase account/provider quota. The platform improves effective context use through retrieval, compact intermediate state, durable memory and checkpointing. `AIOPS_MAX_TOKENS` limits each completion request; it is not a token entitlement.
 
 ## Storage and resumable workflows
 
-Default database: ./data/aiops.db. It stores workflow runs, per-step checkpoints and searchable memory. The dependency-free sequential engine is the default; LangGraph can be used for branching agent graphs.
+Default database: `./data/aiops.db`. It stores workflow runs, per-step checkpoints and searchable memory. The dependency-free sequential engine is the default; LangGraph can be used for branching agent graphs. A run locks its workflow name and ordered unique step-name plan. Reusing a run ID with a changed plan is rejected; create a new run ID when changing step order or logic. Legacy checkpoints without a saved plan are not resumed automatically because their original step order cannot be proved.
 
     from aiops.storage.sqlite import SQLiteStore
     from aiops.workflows.engine import Step, WorkflowEngine

@@ -81,3 +81,19 @@ def test_cli_loads_dotenv_before_resolving_default_database_path(
 
     assert database.is_file()
     assert SQLiteStore(database).count_dataset_records("not-imported") == 0
+
+
+
+def test_environment_loader_supports_an_explicit_environment_file(
+    tmp_path: Path, monkeypatch
+):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("AIOPS_ENV_FILE", raising=False)
+    monkeypatch.delenv("AIOPS_TEST_CUSTOM_ENV", raising=False)
+    env_path = tmp_path / "config" / "work.env"
+    env_path.parent.mkdir()
+    env_path.write_text("AIOPS_TEST_CUSTOM_ENV=custom-file\n", encoding="utf-8")
+    monkeypatch.setenv("AIOPS_ENV_FILE", str(env_path))
+
+    assert load_environment() is True
+    assert os.environ["AIOPS_TEST_CUSTOM_ENV"] == "custom-file"

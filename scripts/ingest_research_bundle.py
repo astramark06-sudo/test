@@ -35,6 +35,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("input_dir", type=Path, help="Directory containing saved research CSV files")
     parser.add_argument("--db", type=Path, default=Path("./data/laptop_research.sqlite"))
+    parser.add_argument("--dry-run", action="store_true", help="Validate all source CSVs without creating or modifying the database")
     args = parser.parse_args()
 
     if not args.input_dir.is_dir():
@@ -65,6 +66,9 @@ def main() -> None:
 
     if not batches:
         raise SystemExit(f"No recognised research CSV files found in {args.input_dir}")
+    if args.dry_run:
+        print(json.dumps(report, indent=2, ensure_ascii=False))
+        return
 
     store = SQLiteStore(args.db)
     for filename, dataset, key_field, path, batch, file_report in batches:

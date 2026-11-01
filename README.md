@@ -79,3 +79,10 @@ Import CSV datasets into SQLite without dropping source columns. Original row co
     aiops dataset-count candidates
 
 Dataset import is idempotent for a stable key field. Private datasets stay local and are excluded from Git.
+
+## Laptop research operations
+
+The private laptop OCR delivery has its own audited workbench and an ingestion runbook. Do not add its screenshots, workbook, CSVs, SQLite database or generated exports to this public repository.
+
+- [Laptop dataset runbook](docs/LAPTOP_DATASET_RUNBOOK.md): inspect the private read-only SQLite snapshot, import compatible CSV batches, and run coverage checks.
+- [Research fact schema](docs/RESEARCH_FACT_SCHEMA.md): capture exact-SKU/model-family scope, one fact per source, price-type separation and conflict handling.

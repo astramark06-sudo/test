@@ -27,7 +27,7 @@ _LOCAL_BACKENDS = {
     "ollama_chat/": ("OLLAMA_BASE_URL", "http://localhost:11434"),
     "lm_studio/": ("LM_STUDIO_BASE_URL", None),
     "vllm/": ("VLLM_BASE_URL", None),
-    "llamacpp/": ("LLAMACPP_BASE_URL", None),
+    "custom_openai/": ("CUSTOM_OPENAI_BASE_URL", None),
 }
 LOCAL_MODEL_PREFIXES = tuple(_LOCAL_BACKENDS)
 

@@ -13,7 +13,7 @@ Run the importer against the bundle's `csv/` directory. It accepts the original 
 - `cpu_benchmarks.csv`
 - `source_register.csv`
 - `extracted_listings_220.csv`
-- `candidate_crosswalk_review.csv`
+- `candidate_crosswalk_review.csv`\n- `manufacturer_spec_facts_2026-11-01.csv`\n- `additional_spec_sources_2026-11-01.csv`
 
 Missing optional files are reported as `missing`; they do not stop ingestion.
 
@@ -36,7 +36,7 @@ The importer writes structured records to SQLite's `dataset_records` table and r
 - `configurations_with_benchmarks`: configuration rows with exact normalized CPU-name joins only.
 - `cpu_benchmarks`: benchmark observations with date and source reference.
 - `research_sources`: source URLs and their stated claim scope.
-- `candidate_crosswalk`: title-similarity review aid; never treat it as proof of SKU identity.
+- `candidate_crosswalk`: title-similarity review aid; never treat it as proof of SKU identity.\n- `manufacturer_spec_facts`: current-checked manufacturer facts with exact-SKU/family scope and caveats.\n- `manufacturer_spec_sources`: manufacturer source index for those fact records.
 
 Do not merge the granular candidate register and broad listing extraction solely on title similarity. Preserve OCR price estimates separately from researched prices, bank offers and exchange values. The CSV crosswalk is only a manual-review aid.
 

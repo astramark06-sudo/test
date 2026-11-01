@@ -87,6 +87,17 @@ class SQLiteStore:
                 value.pop(col)
             return value
 
+
+    def list_steps(self, run_id: str) -> list[dict[str, Any]]:
+        """List checkpoint metadata in insertion order for safe resume checks."""
+        with self.connect() as con:
+            rows = con.execute(
+                """SELECT step_name, status, attempts, updated_at
+                FROM steps WHERE run_id=? ORDER BY rowid""",
+                (run_id,),
+            ).fetchall()
+            return [dict(row) for row in rows]
+
     def save_step(self, run_id: str, step_name: str, status: str, input_data: Any = None, output: Any = None, error: str | None = None) -> None:
         with self.connect() as con:
             con.execute("""INSERT INTO steps(run_id,step_name,status,input_json,output_json,error,attempts) VALUES(?,?,?,?,?,?,CASE WHEN ?='running' THEN 1 ELSE 0 END)

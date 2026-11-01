@@ -87,3 +87,60 @@ def test_keyless_csv_reports_duplicate_content(tmp_path: Path):
 
     assert len(batch.rows) == 3
     assert batch.duplicate_content_rows == 1
+
+
+
+def test_dataset_batches_and_sources_roll_back_as_one_transaction(tmp_path: Path):
+    from aiops.storage.sqlite import SQLiteStore
+
+    store = SQLiteStore(tmp_path / "atomic.sqlite")
+    good_batch = {
+        "dataset": "candidates",
+        "rows": [{"Candidate_ID": "S1-001", "OCR_title": "Samsung"}],
+        "key_field": "Candidate_ID",
+        "source_file": "candidates.csv",
+    }
+    bad_batch = {
+        "dataset": "candidates",
+        "rows": [{"OCR_title": "Missing stable key"}],
+        "key_field": "Candidate_ID",
+        "source_file": "bad.csv",
+    }
+    source = {
+        "uri": "https://manufacturer.example/spec",
+        "title": "Example specifications",
+        "source_type": "manufacturer",
+        "claims": ["Example fact"],
+        "metadata": {"scope": "test"},
+    }
+
+    with pytest.raises(KeyError):
+        store.import_dataset_batches([good_batch, bad_batch], [source])
+
+    assert store.count_dataset_records("candidates") == 0
+    assert store.list_sources() == []
+
+
+def test_dataset_batches_atomically_import_rows_and_sources(tmp_path: Path):
+    from aiops.storage.sqlite import SQLiteStore
+
+    store = SQLiteStore(tmp_path / "atomic.sqlite")
+    batch = {
+        "dataset": "candidates",
+        "rows": [{"Candidate_ID": "S1-001", "OCR_title": "Samsung"}],
+        "key_field": "Candidate_ID",
+        "source_file": "candidates.csv",
+    }
+    source = {
+        "uri": "https://manufacturer.example/spec",
+        "title": "Example specifications",
+        "source_type": "manufacturer",
+        "claims": ["Example fact"],
+        "metadata": {"scope": "test"},
+    }
+
+    result = store.import_dataset_batches([batch], [source])
+
+    assert result["candidates"] == {"rows_imported": 1, "stored_rows_after_import": 1}
+    assert store.list_dataset_records("candidates")[0]["record"]["OCR_title"] == "Samsung"
+    assert store.list_sources()[0]["uri"] == source["uri"]

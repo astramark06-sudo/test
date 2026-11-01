@@ -1,0 +1,11 @@
+description: AI Operations extraction prompt checks
+prompts:
+  - 'Return JSON with fields brand, model, processor, ram_gb, storage, ocr_price_inr and confidence. Preserve unknowns as null. OCR: {{ocr_text}}'
+providers:
+  - echo
+tests:
+  - vars:
+      ocr_text: 'HP 15s Intel Core i3-1215U (8 GB/512 GB SSD) INR 53,990'
+    assert:
+      - type: contains
+        value: ocr_price_inr

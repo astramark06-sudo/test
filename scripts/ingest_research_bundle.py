@@ -35,7 +35,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("input_dir", type=Path, help="Directory containing saved research CSV files")
     parser.add_argument("--db", type=Path, default=Path("./data/laptop_research.sqlite"))
-    parser.add_argument("--dry-run", action="store_true", help="Validate all source CSVs without creating or modifying the database")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Validate all source CSVs without creating or modifying the database",
+    )
     args = parser.parse_args()
 
     if not args.input_dir.is_dir():
@@ -44,12 +48,25 @@ def main() -> None:
     # Preflight every present file before opening the database for writes. A malformed
     # late file must not leave a partially imported multi-dataset bundle.
     batches = []
-    report = {"database": str(args.db), "files": []}
+    report = {"database": str(args.db), "files": [], "datasets": {}}
     for filename, (dataset, key_field) in DATASETS.items():
         path = args.input_dir / filename
         file_report = {"file": filename, "dataset": dataset, "source": str(path)}
+        dataset_report = report["datasets"].setdefault(
+            dataset,
+            {
+                "status": "missing",
+                "source_files": [],
+                "missing_source_files": [],
+                "rows_preflighted": 0,
+                "duplicate_content_rows": 0,
+                "rows_imported": 0,
+            },
+        )
+        dataset_report["source_files"].append(filename)
         if not path.exists():
             file_report["status"] = "missing"
+            dataset_report["missing_source_files"].append(filename)
             report["files"].append(file_report)
             continue
         try:
@@ -61,6 +78,9 @@ def main() -> None:
             "rows": len(batch.rows),
             "duplicate_content_rows": batch.duplicate_content_rows,
         })
+        dataset_report["status"] = "preflight_ok"
+        dataset_report["rows_preflighted"] += len(batch.rows)
+        dataset_report["duplicate_content_rows"] += batch.duplicate_content_rows
         report["files"].append(file_report)
         batches.append((filename, dataset, key_field, path, batch, file_report))
 
@@ -80,6 +100,13 @@ def main() -> None:
             "rows_imported": imported,
             "stored_rows_after_import": store.count_dataset_records(dataset),
         })
+        dataset_report = report["datasets"][dataset]
+        dataset_report["status"] = "imported"
+        dataset_report["rows_imported"] += imported
+        dataset_report["stored_rows_after_import"] = store.count_dataset_records(dataset)
+        if dataset not in dataset_report.setdefault("imported_source_files", []):
+            dataset_report["imported_source_files"].append(filename)
+
         if dataset in {"research_sources", "manufacturer_spec_sources", "verified_official_specs"}:
             for row in batch.rows:
                 url = row.get("URL") or row.get("Official_source_URL")

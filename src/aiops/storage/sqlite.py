@@ -41,6 +41,10 @@ class SQLiteStore:
     def initialize(self) -> None:
         with self.connect() as con:
             con.executescript(SCHEMA)
+            con.execute("""CREATE TABLE IF NOT EXISTS model_usage (
+                usage_id INTEGER PRIMARY KEY AUTOINCREMENT, run_id TEXT, model TEXT, tier TEXT,
+                prompt_tokens INTEGER, completion_tokens INTEGER, total_tokens INTEGER, cost_usd REAL,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)""")
             try:
                 con.execute("CREATE VIRTUAL TABLE IF NOT EXISTS memories_fts USING fts5(title,body,content='memories',content_rowid='memory_id')")
                 con.executescript("""
@@ -105,4 +109,50 @@ class SQLiteStore:
                 if namespace: sql += " AND namespace=?"; args.append(namespace)
                 sql += " ORDER BY updated_at DESC LIMIT ?"; args.append(limit)
                 rows = con.execute(sql,args).fetchall()
+            return [dict(row) for row in rows]
+
+    def record_source(self, uri: str, title: str | None = None, source_type: str | None = None,
+                      claims: list[str] | None = None, metadata: dict[str, Any] | None = None) -> None:
+        with self.connect() as con:
+            con.execute("""INSERT INTO sources(uri,title,source_type,retrieved_at,claims_json,metadata_json)
+              VALUES(?,?,?,CURRENT_TIMESTAMP,?,?) ON CONFLICT(uri) DO UPDATE SET
+              title=excluded.title,source_type=excluded.source_type,retrieved_at=CURRENT_TIMESTAMP,
+              claims_json=excluded.claims_json,metadata_json=excluded.metadata_json""",
+              (uri,title,source_type,json.dumps(claims or [],ensure_ascii=False),
+               json.dumps(metadata or {},ensure_ascii=False)))
+
+    def list_sources(self, limit: int = 100) -> list[dict[str, Any]]:
+        with self.connect() as con:
+            return [dict(row) for row in con.execute("SELECT * FROM sources ORDER BY retrieved_at DESC LIMIT ?",(limit,)).fetchall()]
+
+    def record_artifact(self, path: str | Path, run_id: str | None = None, kind: str | None = None,
+                        sha256: str | None = None, metadata: dict[str, Any] | None = None) -> int:
+        with self.connect() as con:
+            cur=con.execute("INSERT INTO artifacts(run_id,path,kind,sha256,metadata_json) VALUES(?,?,?,?,?)",
+              (run_id,str(path),kind,sha256,json.dumps(metadata or {},ensure_ascii=False)))
+            return int(cur.lastrowid)
+
+    def list_artifacts(self, run_id: str | None = None, limit: int = 100) -> list[dict[str, Any]]:
+        with self.connect() as con:
+            if run_id:
+                rows=con.execute("SELECT * FROM artifacts WHERE run_id=? ORDER BY created_at DESC LIMIT ?",(run_id,limit)).fetchall()
+            else:
+                rows=con.execute("SELECT * FROM artifacts ORDER BY created_at DESC LIMIT ?",(limit,)).fetchall()
+            return [dict(row) for row in rows]
+
+    def record_model_usage(self, model: str | None, tier: str | None, prompt_tokens: int = 0,
+                           completion_tokens: int = 0, total_tokens: int | None = None,
+                           cost_usd: float | None = None, run_id: str | None = None) -> int:
+        total = total_tokens if total_tokens is not None else prompt_tokens + completion_tokens
+        with self.connect() as con:
+            cur=con.execute("INSERT INTO model_usage(run_id,model,tier,prompt_tokens,completion_tokens,total_tokens,cost_usd) VALUES(?,?,?,?,?,?,?)",
+              (run_id,model,tier,prompt_tokens,completion_tokens,total,cost_usd))
+            return int(cur.lastrowid)
+
+    def list_model_usage(self, run_id: str | None = None, limit: int = 100) -> list[dict[str, Any]]:
+        with self.connect() as con:
+            if run_id:
+                rows=con.execute("SELECT * FROM model_usage WHERE run_id=? ORDER BY created_at DESC LIMIT ?",(run_id,limit)).fetchall()
+            else:
+                rows=con.execute("SELECT * FROM model_usage ORDER BY created_at DESC LIMIT ?",(limit,)).fetchall()
             return [dict(row) for row in rows]

@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 from typing import Any
 
+from aiops.config import load_environment
 from aiops.diagnostics import collect_diagnostics, diagnostics_failed, render_diagnostics
 from aiops.export.jsonl import write_jsonl
 from aiops.research.import_validation import load_csv_batch
@@ -20,6 +21,7 @@ def read_csv(path: Path) -> list[dict[str, Any]]:
 
 
 def main() -> None:
+    load_environment()
     parser = argparse.ArgumentParser(
         prog="aiops",
         description="AI Operations Platform utilities",

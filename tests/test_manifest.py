@@ -132,3 +132,26 @@ def test_manifest_cli_creates_and_verifies_sha256_inventory(tmp_path: Path, monk
     main()
     report = json.loads(capsys.readouterr().out)
     assert report["valid"] is True
+
+
+
+@pytest.mark.parametrize("unsafe_path", ["C:/outside.txt", "\\\\server\\share\\file.txt"])
+def test_verifier_rejects_windows_absolute_paths(tmp_path: Path, unsafe_path: str):
+    source = tmp_path / "source"
+    source.mkdir()
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(
+        json.dumps({
+            "schema_version": 1,
+            "algorithm": "sha256",
+            "files": [{
+                "path": unsafe_path,
+                "size_bytes": 1,
+                "sha256": "0" * 64,
+            }],
+        }),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="Unsafe manifest path"):
+        verify_manifest(source, manifest)

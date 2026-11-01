@@ -45,3 +45,40 @@ def test_bundle_import_dry_run_does_not_create_database(tmp_path: Path):
     assert report["datasets"]["laptop_candidates"]["status"] == "preflight_ok"
     assert report["datasets"]["laptop_candidates"]["rows_preflighted"] == 2
     assert database.exists() is False
+
+
+
+def test_bundle_import_preflights_all_files_before_creating_database(tmp_path: Path):
+    input_dir = tmp_path / "input"
+    input_dir.mkdir()
+    (input_dir / "ocr_candidate_register.csv").write_text(
+        "Candidate_ID,OCR_title\nS1-001,Samsung Galaxy Book4\n",
+        encoding="utf-8",
+    )
+    # This file is later in the import order. Its duplicate headers must be
+    # detected before the already-valid candidate file is written to SQLite.
+    (input_dir / "configuration_register.csv").write_text(
+        "Brand,Model_family,Model_family\nAcer,Aspire 3,Aspire 3\n",
+        encoding="utf-8",
+    )
+    database = tmp_path / "must_not_be_partially_imported.sqlite"
+    repository_root = Path(__file__).resolve().parents[1]
+    script = repository_root / "scripts" / "ingest_research_bundle.py"
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(script),
+            str(input_dir),
+            "--db",
+            str(database),
+        ],
+        cwd=repository_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert "duplicate column names" in result.stderr
+    assert database.exists() is False

@@ -38,7 +38,7 @@ Set AIOPS_MODEL_FAST, AIOPS_MODEL_STRONG and AIOPS_MODEL_DEEP in .env to LiteLLM
 
 ## Storage and resumable workflows
 
-Default database: `./data/aiops.db`. It stores workflow runs, per-step checkpoints and searchable memory. The dependency-free sequential engine is the default; LangGraph can be used for branching agent graphs. A run locks its workflow name and ordered unique step-name plan. Reusing a run ID with a changed plan is rejected; create a new run ID when changing step order or logic. Legacy checkpoints without a saved plan are not resumed automatically because their original step order cannot be proved.
+Default database: `./data/aiops.db`. It stores workflow runs, per-step checkpoints and searchable memory. The dependency-free sequential engine is the default; LangGraph can be used for branching agent graphs. A run locks its workflow name, ordered unique step-name plan and explicit per-step revision. Increment a step's `revision` whenever its behavior, prompt, model choice or interpretation changes; reusing a run ID with a changed plan/revision is rejected. Create a new run ID for intentional changes. Legacy checkpoints without a saved plan are not resumed automatically because their original step order cannot be proved.
 
     from aiops.storage.sqlite import SQLiteStore
     from aiops.workflows.engine import Step, WorkflowEngine

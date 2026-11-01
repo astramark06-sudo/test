@@ -42,4 +42,6 @@ def test_bundle_import_dry_run_does_not_create_database(tmp_path: Path):
     ]
     assert len(candidate_files) == 2
     assert all(item["status"] == "preflight_ok" for item in candidate_files)
+    assert report["datasets"]["laptop_candidates"]["status"] == "preflight_ok"
+    assert report["datasets"]["laptop_candidates"]["rows_preflighted"] == 2
     assert database.exists() is False

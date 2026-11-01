@@ -96,4 +96,5 @@ The private laptop OCR delivery has its own audited workbench and an ingestion r
 - [Local deployment preflight](docs/LOCAL_DEPLOYMENT_PREFLIGHT.md): host setup, local-only model routing, MCP/browser boundaries, n8n hardening, backups and release gates.
 - [Optional free-tier cloud services](docs/OPTIONAL_FREE_CLOUD_SERVICES_2026-11-02.md): current Neon, Supabase, Cloudflare Workers and D1 limits; local-first data boundaries and cost controls.
 - [Next analysis session checklist](docs/NEXT_ANALYSIS_SESSION_CHECKLIST.md): the exact read-back, reconciliation, enrichment, database and release steps; avoids rebuilding an already-delivered workbook.
+- [Operator State — 2026-11-02](docs/OPERATOR_STATE_2026-11-02.md): current CI/security/repository status, owner-side settings, host installation boundary and precise saved-bundle handoff.
 - [Open issues and review queue](docs/OPEN_ISSUES_AND_REVIEW_QUEUE.md): prioritized SKU, source-conflict, reconciliation, price and benchmark issues.

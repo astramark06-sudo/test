@@ -92,7 +92,7 @@ The importer recognises these source filenames when present:
 
 The importer reports each expected file as imported or missing. Missing optional files are not treated as zero-record datasets. If both the plain and enriched candidate-register exports are present, the enriched file is imported second and upserts the same candidate IDs; use it only when it contains the intended superset of source fields.
 
-The importer now preflights every present CSV before opening the target database for writes. It rejects missing key headers, blank/whitespace-padded keys, duplicate stable keys, duplicate headers and malformed row widths. Keyless tables report exact duplicate-content rows because hash-key imports would otherwise collapse identical rows. The importer requires at least one recognised CSV file and stops before database writes if any present file fails preflight.
+The importer now preflights every present CSV before opening the target database for writes. It rejects missing key headers, blank/whitespace-padded keys, duplicate stable keys, duplicate headers and malformed row widths. Keyless tables report exact duplicate-content rows because hash-key imports would otherwise collapse identical rows. The importer requires at least one recognised CSV file and stops before database writes if any present file fails preflight. Import outcomes are reported per source filename, so the plain and enriched candidate CSVs cannot overwrite each other's report entries when both are present.
 
 After import, inspect counts (dataset names are the left-hand values in the import report):
 

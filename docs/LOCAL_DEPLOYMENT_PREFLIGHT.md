@@ -113,6 +113,7 @@ The named volume remains unless explicitly removed; do not delete it as a routin
 - Back up SQLite databases before migrations, imports or schema changes.
 - Use `aiops backup-db ./backups/<name>.sqlite --db ./data/aiops.db` to create an online backup and verify its integrity. The command refuses an existing destination unless `--overwrite` is explicitly supplied; it never overwrites the source.
 - Retain an immutable copy of the original input batch and its hash.
+- Generate and verify folder manifests with `aiops hash-tree ./private-source ./private-source.manifest.json` and `aiops verify-manifest ./private-source ./private-source.manifest.json`. Keep the manifest outside the folder so the inventory remains stable.
 - Use separate development and working databases; never test migrations against the only copy.
 - Verify backups with SQLite integrity checks and restore tests on a separate copy.
 - Store workflow run IDs and checkpoint information with delivery manifests so a failed step can resume without repeating completed work.

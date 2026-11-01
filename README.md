@@ -63,7 +63,19 @@ Playwright MCP setup: https://playwright.dev/docs/getting-started-mcp. The offic
     aiops csv-to-jsonl data/candidates.csv artifacts/candidates.jsonl
     aiops validate-jsonl artifacts/candidates.jsonl
     aiops run-status RUN_ID
+    aiops ingest-csv data/candidates.csv candidates --key-field Candidate_ID
+    aiops dataset-count candidates
+    aiops usage-report
 
 ## Data safety
 
 The public repo excludes data/, artifacts/, local DBs, environment files and secrets. Keep private OCR images and generated workbooks outside GitHub. CI runs lightweight unit tests; model weights and browser downloads are excluded.
+
+## Local dataset store
+
+Import CSV datasets into SQLite without dropping source columns. Original row content remains as JSON.
+
+    aiops ingest-csv data/candidates.csv candidates --key-field Candidate_ID
+    aiops dataset-count candidates
+
+Dataset import is idempotent for a stable key field. Private datasets stay local and are excluded from Git.

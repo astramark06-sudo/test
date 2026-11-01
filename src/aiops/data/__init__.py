@@ -1,0 +1,1 @@
+"""Optional local analytics adapters."""

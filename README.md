@@ -34,6 +34,8 @@ Core storage, workflow, matching, and JSONL export functions need only Python an
 
 See [OCR engine compatibility](docs/OCR_ENGINE_COMPATIBILITY.md) for the pinned PaddleOCR 3.x API, CPU install path, model-download behavior and OCR adapter contract.
 
+The Python entry points load `.env` from the current project directory automatically, without overriding variables already exported by the shell. Set `AIOPS_ENV_FILE` in the shell to use a different environment-file path. Keep `.env` local; never commit it.
+
 ## Model routing and token efficiency
 
 Set AIOPS_MODEL_FAST, AIOPS_MODEL_STRONG and AIOPS_MODEL_DEEP in .env to LiteLLM model IDs. Hosted providers are blocked by default. Local-only mode accepts `ollama/` and `ollama_chat/` using `OLLAMA_BASE_URL` (default `http://localhost:11434`); `lm_studio/`, `vllm/` and `llamacpp/` require `LM_STUDIO_BASE_URL`, `VLLM_BASE_URL` or `LLAMACPP_BASE_URL`. Every configured or per-call `api_base` / `base_url` must resolve to a loopback host. `hosted_vllm/` is not treated as local. Set `AIOPS_ALLOW_REMOTE_MODELS=true` only when provider charges and data handling are explicitly accepted; this opts out of the local-only boundary. A router cannot add model context length or increase account/provider quota. The platform improves effective context use through retrieval, compact intermediate state, durable memory and checkpointing. `AIOPS_MAX_TOKENS` limits each completion request; it is not a token entitlement.

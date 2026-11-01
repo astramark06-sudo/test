@@ -96,3 +96,67 @@ https://in.msi.com/Business-Productivity/Modern-14-C7X/Specification
 MSI's own variant comparison lists Modern 14 C7M-400IN with Ryzen 5 7430U, 16GB DDR4-3200 onboard memory and 512GB NVMe PCIe Gen3 SSD. The same page lists other C7M SKUs with different CPUs and memory sizes, including 8GB variants for other CPU options.
 
 **Disposition:** The existing research row that combines Ryzen 5 7430U with 8GB/512GB has an explicit manufacturer-spec conflict: C7M-400IN is 16GB. Do not silently change the OCR 8GB value or claim C7M-400IN is the exact listing. The CPU/family match is not enough; exact SKU or seller configuration evidence is required.
+
+
+## 10. Neopticon EBook and BrowseBook — official brand pages
+
+**Official sources:**
+- EBook 11.6-inch: https://neopticon.com/ebook/
+- BrowseBook 14.1-inch product page: https://neopticon.com/product/neopticon-browsebook-14-1-fhd-ips-laptop-intel-celeron-n4020-dual-core-up-to-2-8ghz-4gb-ram-256gb-ssd-intel-uhd-graphics-windows-11-home-38wh-1-3kg-grey/
+- Current product-family listing: https://neopticon.com/product-specification/
+
+The EBook 11.6 page describes Celeron N4020, 4GB DDR4, 128GB eMMC, an M.2 SSD expansion slot, 11.6-inch HD display, Windows 11 Home, 31Wh battery and 1.1kg. This differs from OCR wording that can be read as "128GB SSD + 128GB eMMC"; treat the M.2 slot as expansion capability, not evidence of a second preinstalled 128GB SSD.
+
+The BrowseBook 14.1 page describes Celeron N4020, 4GB DDR4, 128GB SSD, FHD IPS display, Windows 11 Home and 1.3kg. The current family listing also shows 8GB RAM and 256GB SSD BrowseBook variants. The family page therefore supports multiple configurations, but the product page's 4GB configuration must not be substituted for an OCR listing that says 8GB.
+
+**Disposition:** Manufacturer pages support the model families and available variant ranges. Match RAM/storage to the exact displayed option before updating the workbook. Source page content has some inconsistent repeated product-card fragments; keep each fact tied to the relevant product card and exact variant rather than treating the entire page as one SKU.
+
+## 11. Primebook WiFi / 4G — MT8183 versus MT8788
+
+**Manufacturer sources:**
+- Primebook WiFi store listing: https://shop.primebook.in/products/primebook-wifi
+- Primebook 4G/WiFi technical brochure (PDF): https://primeos.s3.ap-south-1.amazonaws.com/PrimebookProductPPT_V1.pdf
+- Primebook FAQ: https://www.primebook.in/faq
+- Primebook product comparison article: https://www.primebook.in/blog/best-laptops-for-students-under-inr-15000-primebook
+
+The original Primebook brochure explicitly separates MT8183 on the WiFi model from MT8788 on the 4G model. It specifies 4GB LPDDR4, 64GB/128GB eMMC, 11.6-inch 720p IPS, PrimeOS 2.3 A11 (Android), and microSD expansion; the WiFi and 4G versions have different cellular capability. Do not merge the two chipset configurations. More recent Primebook Max models are a different hardware generation and must not be used to fill the older WiFi model.
+
+**Disposition:** For an OCR row titled Primebook WiFi with MT8183 and 4GB/64GB, the family/variant is strongly supported. Preserve 64GB versus 128GB as separate variants; the original brochure is historical and should not be used to assert a current OS release or current battery life without a recent exact-product source.
+
+## 12. JioBook 11 — model NB1112MMBLU / MT8788
+
+**Sources:**
+- JioBook official support: https://www.jio.com/jiobook/support/
+- JioMart product listing: https://www.jiomart.com/product/jiobook-11-with-lifetime-officeandroid-4g-laptop-mediatek-8788-jioosoctacore4gb-ram64-emmc-storagethin-and-light-laptop-116-inch-990-gramsdual-band-wifi-simblue-mfqiog-7628646/
+- Secondary listing with model/part number: https://www.flipkart.com/jio-jiobook-11-jioos-lifetime-office-mediatek-mt8788-4-gb-64-gb-emmc-storage-android-11-nb1112mmblu-thin-light-laptop-inbuilt-4g-lte/p/itm5e242fe9ed52d
+
+The seller listings identify JioBook 11 / NB1112MMBLU with MediaTek MT8788, 4GB LPDDR4, 64GB eMMC, 11.6-inch 1366x768 display, JioOS/Android, built-in 4G LTE, microSD expansion and approximately 990g. Jio's official support page confirms the JioBook ecosystem, JioStore, JioSphere browser and SoftMaker Office suite, but is not a detailed hardware datasheet.
+
+**Disposition:** The OCR row with MT8788 / 4GB / 64GB / JioOS is a strong family/configuration match. Use NB1112MMBLU only when the blue 4G variant/part number is visible or independently confirmed; retailer records should be identified as secondary sources, not manufacturer specifications.
+
+## 13. Ultimus Apex Pro — N4200 exact listing lead
+
+**Secondary source:** Flipkart listing for Ultimus Apex Pro, model NU14U8INC54LS-SG / part number NU14U8INB54LS-SG  
+https://www.flipkart.com/ultimus-apex-pro-intel-pentium-quad-core-n4200-4-gb-128-gb-ssd-128-emmc-storage-windows-11-home-nu14u8inc54ls-sg-laptop/p/itm57488f91f02c8
+
+The listing identifies Pentium N4200, 4GB DDR3, 128GB SSD plus 128GB eMMC, Windows 11 Home, and a 14.1-inch 1366x768 display. It names the model Apex Pro FU06.
+
+**Disposition:** This is a strong listing-level lead for the OCR Apex Pro candidate because processor and storage wording are unusually specific. Since the source is a marketplace page rather than an official manufacturer support page, retain it as secondary evidence and require the model/part number match before treating it as exact-SKU verification.
+
+## 14. Motorola "Motobook 6" — title normalization remains unresolved
+
+**Official Motorola source for the current product family:**  
+https://www.motorola.in/laptop-moto-book-60-pro-core-5/p
+
+Motorola's current product navigation explicitly names Moto Book 60 Pro Core 5 and Core 7 as laptop models. Other launch-era coverage describes the distinct original Moto Book 60 with Core 5 210H / Core 7 240H, 16GB DDR5 and 512GB/1TB storage configurations.
+
+**Disposition:** OCR text "Motorola Motobook 6" may be a clipped or truncated reference to "Moto Book 60", but that is only a title-normalization hypothesis. A detected price near ₹76,990 is not identity evidence. Do not assign either Moto Book 60 or Moto Book 60 Pro specifications to this candidate until the full title, processor, RAM/storage and SKU are visible. Keep the OCR row unresolved.
+
+## 15. Thomson NEO 3K / IN-K14C — secondary-source-only lead
+
+**Secondary source:**  
+https://www.savekarloo.com/product/thomson-141-inch-3k-high-resolution-display-in-k14c-intel-celeron-b0dyvtlp29
+
+A retailer-style product page associates model IN-K14C with Intel Celeron N5100, 8GB LPDDR4, 256GB SSD and a 14.1-inch 3000×2000 QHD+ display. No sufficiently authoritative current manufacturer datasheet was identified in this audit.
+
+**Disposition:** This may be used as a low-confidence research lead only. The workbook's NEO 3K family row should retain OCR-sourced display/storage facts and clearly label every detail obtained from this secondary page. Do not elevate it to verified SKU status without a manufacturer model sheet or service manual.

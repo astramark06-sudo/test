@@ -253,3 +253,23 @@ https://store.lenovo.com/in/en/ideapad-slim-3i-35-56cms-12th-gen-intel-i5-82rj00
 The Lenovo page identifies 82RJ005CIN as a 14-inch IdeaPad Slim 3i / 3i Gen 7 with Core i5-1235U, 8GB soldered DDR4-3200, 512GB M.2 2280 SSD, Windows 11 Home, Iris Xe, a 14-inch FHD IPS 300-nit anti-glare panel and 2-year onsite warranty.
 
 **Disposition:** Strong exact product lead for an i5-1235U / 8GB / 512GB 14-inch Lenovo listing. Do not merge with 82RK0085IN: the latter is a 15.6-inch 16GB configuration with a different panel and memory layout.
+
+
+## 26. Acer Aspire 3 A325-42 — Ryzen 3 5400U, 8GB / 512GB
+
+**Acer India Official Store references:**
+- UN.34QSI.00X: https://store.acer.com/en-in/laptops/student-laptop/processor_type-ryzentm_3
+- UN.34QSI.00Z: https://store.acer.com/en-in/festive-save-live/processor_type-ryzentm_3
+
+Acer lists Aspire 3 A325-42 variants with Ryzen 3 5400U, 8GB DDR4, 512GB PCIe Gen3 NVMe, 15.6-inch FHD IPS, Windows 11 Home and Radeon graphics. The indexed page data identifies UN.34QSI.00X and UN.34QSI.00Z as separate references; the first lists upgrade support to 32GB. Keep the reference code attached to each source observation, even where the high-level CPU/RAM/storage/display combination appears the same.
+
+**Disposition:** Strong manufacturer model/configuration lead for an Aspire 3 R3-5400U / 8GB / 512GB listing. Do not confuse it with the separate A325-42 R3-5300U reference UN.34QSI.018 or any Aspire Lite R3-5400U model.
+
+## 27. Acer Aspire Lite AL15-41 — Ryzen 3 5400U, 8GB / 256GB
+
+**Acer India Official Store indexed reference UN.31ZSI.06V:**  
+https://store.acer.com/en-in/laptops/aspire/processor_type-ryzentm_3
+
+The indexed store specification identifies Aspire Lite AL15-41 with Ryzen 3 5400U, 8GB DDR4 expandable up to 32GB, 256GB PCIe Gen3 SSD, 15.6-inch FHD IPS display and Windows 11 Home. Acer's same indexed category data separately lists AL15-41 / R3-7330U / 8GB / 512GB under another reference (UN.31ZSI.06P).
+
+**Disposition:** Keep this as a separate AL15-41 configuration. Do not merge it with the Ryzen 3 7330U / 512GB AL15-41 variant or transfer its 256GB storage value to an OCR row that names another processor.

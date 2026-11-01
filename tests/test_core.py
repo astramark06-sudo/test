@@ -51,7 +51,7 @@ def test_configuration_match_requires_variant_disambiguation():
         {"Brand":"Acer","Processor":"Intel Core i3-1315U","Model_family":"A","RAM_seen":"8GB","Storage_seen":"512GB SSD"},
         {"Brand":"Acer","Processor":"Intel Core i3-1315U","Model_family":"B","RAM_seen":"16GB","Storage_seen":"512GB SSD"}]
     result=match_configuration(candidate,configs)
-    assert result['match_status']=='exact_configuration' and result['researched_Model_family']=='A'
+    assert result['match_status']=='unique_configuration_consistent_with_observed_capacities'\n    assert result['researched_Model_family']=='A'\n    assert result['capacity_fields_confirmed'] == ['RAM_detected', 'Storage_detected']
 
 
 def test_mcp_is_disabled_by_default(tmp_path: Path):
@@ -92,3 +92,81 @@ def test_local_model_router_rejects_non_loopback_ollama_endpoint(monkeypatch):
     monkeypatch.setenv("OLLAMA_BASE_URL", "https://remote.example:11434")
     with pytest.raises(ModelNotConfigured):
         ModelRouter({"fast": "ollama_chat/qwen2.5:7b"}, allow_remote=False).select("fast")
+
+
+
+def test_configuration_match_does_not_match_8gb_inside_18gb():
+    candidate = {
+        "Brand_detected": "HP",
+        "Processor_detected": "Intel Core i3-1315U",
+        "RAM_detected": "8 GB",
+        "Storage_detected": "512 GB SSD",
+    }
+    configurations = [{
+        "Brand": "HP",
+        "Processor": "Intel Core i3-1315U",
+        "Model_family": "HP 15",
+        "RAM_seen": "18GB DDR4",
+        "Storage_seen": "512GB SSD",
+    }]
+
+    result = match_configuration(candidate, configurations)
+
+    assert result["match_status"] == "ocr_configuration_mismatch"
+    assert result["match_confidence"] == "low"
+
+
+def test_configuration_match_keeps_missing_research_capacity_ambiguous():
+    candidate = {
+        "Brand_detected": "Lenovo",
+        "Processor_detected": "AMD Ryzen 5 7520U",
+        "RAM_detected": "8 GB",
+        "Storage_detected": "512 GB SSD",
+    }
+    configurations = [
+        {
+            "Brand": "Lenovo",
+            "Processor": "AMD Ryzen 5 7520U",
+            "Model_family": "IdeaPad A",
+            "RAM_seen": "8GB",
+            "Storage_seen": "",
+        },
+        {
+            "Brand": "Lenovo",
+            "Processor": "AMD Ryzen 5 7520U",
+            "Model_family": "IdeaPad B",
+            "RAM_seen": "8GB",
+            "Storage_seen": "512GB SSD",
+        },
+    ]
+
+    result = match_configuration(candidate, configurations)
+
+    assert result["match_status"] == "ambiguous_multiple_configurations"
+
+
+def test_model_router_rejects_remote_api_base_override_before_provider_call():
+    router = ModelRouter(
+        {"fast": "ollama_chat/qwen2.5:7b"},
+        allow_remote=False,
+    )
+
+    with pytest.raises(ModelNotConfigured, match="api_base override"):
+        router.complete([], tier="fast", api_base="https://api.example.com/v1")
+
+
+def test_model_router_rejects_hosted_vllm_without_remote_opt_in():
+    with pytest.raises(ModelNotConfigured):
+        ModelRouter(
+            {"fast": "hosted_vllm/provider/model"},
+            allow_remote=False,
+        ).select("fast")
+
+
+def test_model_router_requires_explicit_loopback_for_non_ollama_backend(monkeypatch):
+    router = ModelRouter({"fast": "vllm/local-model"}, allow_remote=False)
+    with pytest.raises(ModelNotConfigured, match="VLLM_BASE_URL"):
+        router.select("fast")
+
+    monkeypatch.setenv("VLLM_BASE_URL", "http://127.0.0.2:8000/v1")
+    assert router.select("fast") == "vllm/local-model"

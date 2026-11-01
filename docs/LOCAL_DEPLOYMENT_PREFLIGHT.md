@@ -111,6 +111,7 @@ The named volume remains unless explicitly removed; do not delete it as a routin
 
 - Keep `data/` and `artifacts/` outside version control.
 - Back up SQLite databases before migrations, imports or schema changes.
+- Use `aiops backup-db ./backups/<name>.sqlite --db ./data/aiops.db` to create an online backup and verify its integrity. The command refuses an existing destination unless `--overwrite` is explicitly supplied; it never overwrites the source.
 - Retain an immutable copy of the original input batch and its hash.
 - Use separate development and working databases; never test migrations against the only copy.
 - Verify backups with SQLite integrity checks and restore tests on a separate copy.

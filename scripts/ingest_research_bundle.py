@@ -20,6 +20,8 @@ DATASETS = {
     "source_register.csv": ("research_sources", "URL"),
     "extracted_listings_220.csv": ("extracted_listings", "Listing_Record_ID"),
     "candidate_crosswalk_review.csv": ("candidate_crosswalk", "Candidate_ID"),
+    "manufacturer_spec_facts_2026-11-01.csv": ("manufacturer_spec_facts", "Spec_Fact_ID"),
+    "additional_spec_sources_2026-11-01.csv": ("manufacturer_spec_sources", "URL"),
 }
 
 
@@ -44,11 +46,17 @@ def main() -> None:
             "stored_rows": store.count_dataset_records(dataset),
             "source": str(path),
         }
-        if dataset == "research_sources":
+        if dataset in {"research_sources", "manufacturer_spec_sources"}:
             for row in rows:
+                claims = [
+                    row.get("Claims / scope") or row.get("Scope") or "",
+                    row.get("Evidence quality / caveat") or "",
+                ]
+                source_type = row.get("Source type") or "Manufacturer specification"
                 store.record_source(
-                    row["URL"], row["Source title"], row["Source type"],
-                    [row["Claims / scope"]], {"source_file": filename},
+                    row["URL"], row.get("Source title"), source_type,
+                    [claim for claim in claims if claim],
+                    {"source_file": filename, **row},
                 )
     print(json.dumps(report, indent=2, ensure_ascii=False))
 

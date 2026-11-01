@@ -94,5 +94,6 @@ The private laptop OCR delivery has its own audited workbench and an ingestion r
 - [Research fact schema](docs/RESEARCH_FACT_SCHEMA.md): capture exact-SKU/model-family scope, one fact per source, price-type separation and conflict handling.
 - [Official model source audit — 2026-11-02](docs/OFFICIAL_MODEL_SOURCE_AUDIT_2026-11-02.md): scoped manufacturer-source checks and unresolved SKU/OS conflicts; no inferred price updates.
 - [Local deployment preflight](docs/LOCAL_DEPLOYMENT_PREFLIGHT.md): host setup, local-only model routing, MCP/browser boundaries, n8n hardening, backups and release gates.
+- [Optional free-tier cloud services](docs/OPTIONAL_FREE_CLOUD_SERVICES_2026-11-02.md): current Neon, Supabase, Cloudflare Workers and D1 limits; local-first data boundaries and cost controls.
 - [Next analysis session checklist](docs/NEXT_ANALYSIS_SESSION_CHECKLIST.md): the exact read-back, reconciliation, enrichment, database and release steps; avoids rebuilding an already-delivered workbook.
 - [Open issues and review queue](docs/OPEN_ISSUES_AND_REVIEW_QUEUE.md): prioritized SKU, source-conflict, reconciliation, price and benchmark issues.

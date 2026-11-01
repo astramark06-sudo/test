@@ -123,6 +123,7 @@ def test_manifest_cli_creates_and_verifies_sha256_inventory(tmp_path: Path, monk
     )
     main()
     assert manifest.is_file()
+    capsys.readouterr()
 
     monkeypatch.setattr(
         sys,

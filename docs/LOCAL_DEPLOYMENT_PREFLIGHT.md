@@ -6,7 +6,7 @@ The canonical implementation is maintained in the public GitHub repository. This
 
 Required for the core local platform:
 
-- Python 3.10 or newer (CI currently tests Python 3.11).
+- Python 3.10 or newer. CI tests Python 3.10, 3.11, 3.12 and 3.13; the current main-branch matrix passes on all four.
 - SQLite (bundled with standard Python builds).
 - Git to clone/pull the source.
 - No hosted LLM account, API key, paid service or cloud database is required for the core workflow.
@@ -26,6 +26,12 @@ aiops init-db
 ```
 
 On Windows PowerShell, activate with `.venv\\Scripts\\Activate.ps1`. Keep the virtual environment local and do not commit it.
+
+### Repository maintenance
+
+- Dependabot checks Python dependencies and GitHub Actions weekly. Related updates are grouped into reviewable pull requests; auto-merge is not enabled.
+- The `main` branch currently has no branch protection or repository ruleset. Recommended owner configuration: require a pull request and successful CI matrix jobs for Python 3.10, 3.11, 3.12 and 3.13; block force-pushes and branch deletion.
+- This repository is public and currently has no `LICENSE` file. Keep all private laptop data out of it. Choose a license only when the owner decides what external reuse to permit.
 
 ## 2. Private research data
 

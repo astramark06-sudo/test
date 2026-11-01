@@ -250,6 +250,24 @@ def collect_diagnostics(
                 )
             )
 
+    n8n_key = os.getenv("N8N_ENCRYPTION_KEY", "")
+    if not n8n_key:
+        checks.append(
+            _check("n8n encryption key", "INFO", "not configured; optional n8n service is not enabled")
+        )
+    elif n8n_key.casefold().startswith("replace-with") or len(n8n_key) < 32:
+        checks.append(
+            _check(
+                "n8n encryption key",
+                "WARN",
+                "value appears to be a placeholder or shorter than 32 characters; replace it before n8n startup",
+            )
+        )
+    else:
+        checks.append(
+            _check("n8n encryption key", "PASS", "configured; value is intentionally hidden")
+        )
+
     database = Path(db_path).expanduser()
     if not database.exists():
         checks.append(_check("SQLite database", "INFO", f"not initialized: {database}"))

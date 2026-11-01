@@ -11,6 +11,8 @@
 | Automation | Python workflows | n8n | repeatable event and scheduled tasks |
 | Evaluation | pytest and Ruff | Promptfoo, Langfuse | regression tests, traces and failure analysis |
 
+Model usage is recorded only when a call supplies a SQLite usage store and run ID; the ledger captures provider-reported token counts and response cost. A recorded zero or missing cost is not a measurement of local electricity or hardware cost.
+
 ## Context efficiency
 
 1. Persist full source data outside the prompt.

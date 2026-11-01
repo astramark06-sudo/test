@@ -65,7 +65,7 @@ No model weights are included in this repository.
 
 ### OCR runtime
 
-- The PaddleOCR adapter targets PaddleOCR 3.7.x and PaddlePaddle 3.2 or newer; the optional OCR extra is pinned to the supported 3.x minor line.
+- The PaddleOCR adapter targets PaddleOCR 3.7.x and pins PaddlePaddle 3.2.0, the CPU version shown by PaddleOCR's current quick start. The OCR extra pins the PaddleOCR 3.7 minor line.
 - Install the CPU-oriented default only when OCR is needed: `python -m pip install -e ".[ocr]"`.
 - The first PaddleOCR run may download model weights. Check free disk and RAM first; do not auto-download on the user's device.
 - GPU runtime installation is host-specific. Confirm OS, Python, CUDA and GPU compatibility against the official PaddlePaddle install matrix before replacing CPU wheels.

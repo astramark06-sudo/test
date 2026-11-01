@@ -4,6 +4,7 @@ from __future__ import annotations
 import os
 import sqlite3
 import tempfile
+from contextlib import closing
 from pathlib import Path
 
 
@@ -46,8 +47,8 @@ def backup_database(
 
     try:
         source_uri = source.resolve().as_uri() + "?mode=ro"
-        with sqlite3.connect(source_uri, uri=True, timeout=30) as source_db:
-            with sqlite3.connect(temporary, timeout=30) as backup_db:
+        with closing(sqlite3.connect(source_uri, uri=True, timeout=30)) as source_db:
+            with closing(sqlite3.connect(temporary, timeout=30)) as backup_db:
                 source_db.backup(backup_db)
                 result = backup_db.execute("PRAGMA integrity_check").fetchone()
                 if not result or result[0] != "ok":

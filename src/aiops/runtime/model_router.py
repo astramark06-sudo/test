@@ -31,4 +31,7 @@ class ModelRouter:
         model = self.select(tier)
         try: from litellm import completion
         except ImportError as exc: raise RuntimeError("Install with pip install -e '.[llm]'") from exc
-        return completion(model=model, messages=messages, max_tokens=min(max_tokens or self.max_tokens,self.max_tokens), **kwargs)
+        tier_key = tier.value if isinstance(tier, ModelTier) else str(tier)
+        tier_cap = int(os.getenv(f"AIOPS_MAX_TOKENS_{tier_key.upper()}", str(self.max_tokens)))
+        output_cap = max(1, min(max_tokens or tier_cap, tier_cap, self.max_tokens))
+        return completion(model=model, messages=messages, max_tokens=output_cap, **kwargs)

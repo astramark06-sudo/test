@@ -273,3 +273,31 @@ https://store.acer.com/en-in/laptops/aspire/processor_type-ryzentm_3
 The indexed store specification identifies Aspire Lite AL15-41 with Ryzen 3 5400U, 8GB DDR4 expandable up to 32GB, 256GB PCIe Gen3 SSD, 15.6-inch FHD IPS display and Windows 11 Home. Acer's same indexed category data separately lists AL15-41 / R3-7330U / 8GB / 512GB under another reference (UN.31ZSI.06P).
 
 **Disposition:** Keep this as a separate AL15-41 configuration. Do not merge it with the Ryzen 3 7330U / 512GB AL15-41 variant or transfer its 256GB storage value to an OCR row that names another processor.
+
+
+## 28. HP Laptop 15s-fq5038nv — 9X6Y6EA, Core i3-1215U, 8GB / 512GB
+
+**HP Support India exact product record:**  
+https://support.hp.com/in-en/product/product-specs/hp-15.6-inch-laptop-pc-15-d5000/model/2101006279?sku=9X6Y6EA
+
+The exact HP product support page identifies 15s-fq5038nv / product number 9X6Y6EA with Core i3-1215U (6C/8T), 8GB DDR4-3200 (1x8GB), 512GB PCIe NVMe M.2 SSD, Windows 11 Home, Intel UHD graphics, 41Wh three-cell battery, Wi-Fi 6 and a 720p camera. HP lists USB-C as data-only, without charging or external-monitor support.
+
+**Disposition:** Strong exact manufacturer configuration reference for an HP 15s Core i3-1215U / 8GB / 512GB / Windows 11 row. Do not assign 9X6Y6EA unless the screenshot or seller record gives that product number; other 15s-fq variants may have different panels, memory, wireless cards or OS.
+
+## 29. ASUS Vivobook 15 X1504VA — Core i3-1315U, 8GB / 512GB SKU cluster
+
+**ASUS Store India product references (pages state AYR Technologies is the authorized reseller):**
+- X1504VA-BQ321WS: https://in.store.asus.com/light-weight-asus-vivobook-15-x1504va-bq321ws.html
+- X1504VA-NJ3321WS: https://in.store.asus.com/light-weight-laptop-asus-vivobook-15-x1504va-nj3321ws.html
+- X1504VA-BQ323WS: https://in.store.asus.com/light-weight-laptop-asus-vivobook-15-x1504va-bq323ws.html
+- X1504VA-NJ3320WS: https://in.store.asus.com/light-weight-laptop-asus-vivobook-15-x1504va-nj3320ws.html
+
+The listed variants identify Core i3-1315U, 8GB DDR4 onboard memory, 512GB M.2 NVMe PCIe 4.0, 15.6-inch FHD 250-nit display and Windows 11 Home. The individual product pages do not all describe the same SO-DIMM maximum/topology: some describe upgrade to 24GB, while others state a different maximum. Product suffix and exact page therefore matter.
+
+**Disposition:** This SKU cluster is a strong explanation for an OCR row that says only Vivobook 15 / i3-1315U / 8GB / 512GB. It is not sufficient to choose one sub-model. Do not copy one suffix's memory upgrade claim or panel details into another SKU. The previously documented X1504VA-BQ331WS is a different 12GB (8GB onboard + 4GB SO-DIMM) configuration.
+
+## 30. Lenovo IdeaPad Slim 3i Gen 7 — 82RK0085IN and 82RJ005CIN are separate configurations
+
+The exact Lenovo India store references are documented in Sections 24 and 25. The 15.6-inch 82RK0085IN is an i5-1235U / 16GB (8GB soldered + 8GB SO-DIMM) / 512GB configuration with FHD TN 250-nit panel. The 14-inch 82RJ005CIN is i5-1235U / 8GB soldered / 512GB with an FHD IPS 300-nit panel.
+
+**Disposition:** A generic OCR label such as "IdeaPad Slim 3i i5-1235U 512GB" cannot distinguish these records. The RAM, screen size and panel type must be reconciled before selecting a variant; do not treat the two MTMs as interchangeable.

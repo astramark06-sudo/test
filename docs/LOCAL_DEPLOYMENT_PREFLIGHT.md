@@ -1,0 +1,118 @@
+# Local Deployment Preflight
+
+The canonical implementation is maintained in the public GitHub repository. This document is a host-side checklist; it does not imply that services, model weights, browser binaries, credentials or background agents have been installed on the user's device.
+
+## 1. Core environment
+
+Required for the core local platform:
+
+- Python 3.10 or newer (CI currently tests Python 3.11).
+- SQLite (bundled with standard Python builds).
+- Git to clone/pull the source.
+- No hosted LLM account, API key, paid service or cloud database is required for the core workflow.
+
+Recommended isolated installation:
+
+```bash
+git clone https://github.com/astramark06-sudo/test.git
+cd test
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev,data]"
+ruff check .
+pytest -q
+aiops init-db
+```
+
+On Windows PowerShell, activate with `.venv\\Scripts\\Activate.ps1`. Keep the virtual environment local and do not commit it.
+
+## 2. Private research data
+
+- Keep the evidence bundle and workbook in a private local directory, not the public repository.
+- Extract the separate read-only SQLite workbench bundle for inspection; do not use it as a write target.
+- For a new import/reprocessing run, copy the source CSV batch to a versioned private input directory and preserve that input directory unchanged.
+- Save the import report and a SHA-256 manifest beside the batch.
+- Import into a new database or a verified backup copy first. The canonical importer upserts by key; reusing a key replaces its stored payload.
+- Do not load screenshots or private OCR files into GitHub issues, Actions artifacts, public logs or model-provider prompts unless the destination has been explicitly reviewed.
+
+See [Laptop dataset runbook](LAPTOP_DATASET_RUNBOOK.md) and [Research fact schema](RESEARCH_FACT_SCHEMA.md).
+
+## 3. Model runtime
+
+Default posture: local-only; remote providers remain blocked.
+
+1. Leave `AIOPS_ALLOW_REMOTE_MODELS=false`.
+2. Keep `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY` empty unless remote access is separately approved and cost understood.
+3. Configure a local Ollama endpoint only after Ollama is installed and reachable at `http://localhost:11434`.
+4. Pick model weights to fit actual host RAM/VRAM and task needs. Do not automatically download large models.
+5. Keep prompts and retrieved context compact; send row batches with stable IDs and source pointers; persist full evidence outside model context.
+6. Record actual observed token usage. A router, model alias or `AIOPS_MAX_TOKENS` setting does not increase the ChatGPT account quota or the model/provider context window.
+
+No model weights are included in this repository.
+
+## 4. MCP and browser safety
+
+The example MCP registry keeps every server disabled by default. Enable only the one required for a specific workflow.
+
+- Filesystem server: allow only a dedicated project data and artifact directory; never the home directory, credential folders or whole disk.
+- Fetch server: public web pages only; do not permit access to private IP ranges or local control planes.
+- Playwright: isolated browser profile, no personal logged-in sessions, no saved passwords, no payment profile.
+- GitHub MCP: prefer the existing connected GitHub App over a second personal access token. If a PAT is unavoidable, use least privilege and short expiry.
+- Git MCP: scope it to this repository only.
+- Do not enable MCP tools solely to duplicate access already available through an approved connector.
+
+## 5. n8n local automation
+
+The optional Compose profile binds n8n to loopback `127.0.0.1`; it is not intended to be exposed directly to a public network.
+
+Before startup:
+
+- Set a unique high-entropy `N8N_ENCRYPTION_KEY` in the local, ignored `.env`.
+- Back up the n8n volume and key together; the key is required to decrypt stored credentials.
+- Review workflow nodes and credentials before activation.
+- Do not expose the service via router port-forwarding.
+- Pin the n8n image to a reviewed release or digest before a production deployment; the current example uses the moving `latest` tag for convenience.
+- Start only when required: `docker compose --profile automation -f deploy/docker-compose.yml up -d`.
+
+Stop with:
+
+```bash
+docker compose --profile automation -f deploy/docker-compose.yml down
+```
+
+The named volume remains unless explicitly removed; do not delete it as a routine stop operation.
+
+## 6. Storage, backup and recovery
+
+- Keep `data/` and `artifacts/` outside version control.
+- Back up SQLite databases before migrations, imports or schema changes.
+- Retain an immutable copy of the original input batch and its hash.
+- Use separate development and working databases; never test migrations against the only copy.
+- Verify backups with SQLite integrity checks and restore tests on a separate copy.
+- Store workflow run IDs and checkpoint information with delivery manifests so a failed step can resume without repeating completed work.
+- Keep outputs and their source manifest together; record hashes for every release artifact.
+
+## 7. Observability and evaluation
+
+Optional Langfuse can record traces, latency and model/provider usage. Keep raw OCR and private prompts out of external telemetry unless the data handling terms and destination have been reviewed. For local-first usage, keep structured run records in SQLite and run the deterministic tests before adding a remote observability service.
+
+Promptfoo and model-based evaluation are optional. The CI baseline remains Ruff and pytest. Add deterministic fixture tests for parser, matching, reconciliation and price classification before enabling automated bulk enrichment.
+
+## 8. Release gate
+
+Do not call a release complete until:
+
+- CI is green for the exact commit.
+- The local environment can initialize the database and pass tests.
+- Secrets are absent from Git history and tracked files.
+- MCP servers are disabled unless specifically required and scoped.
+- n8n is loopback-only with an encryption key if used.
+- Remote model access is disabled unless explicitly approved.
+- Private datasets stay local.
+- A recovery copy and SHA-256 manifest exist.
+- The release notes distinguish built code, configured examples, installed services and actually tested runtime integrations.
+
+## Not completed from this environment
+
+The user's phone/PC filesystem and shell are not connected to this repository session. Therefore this session cannot truthfully claim that Python packages, Ollama, model weights, MCP processes, Playwright browsers or n8n have been installed or started on the user's device. This preflight makes those steps reproducible when performed on the host.

@@ -62,6 +62,7 @@ Default posture: local-only; remote providers remain blocked.
 6. Pick model weights to fit actual host RAM/VRAM and task needs. Do not automatically download large models.
 7. Keep prompts and retrieved context compact; send row batches with stable IDs and source pointers; persist full evidence outside model context.
 8. Record actual observed token usage. A router, model alias or `AIOPS_MAX_TOKENS` setting does not increase the ChatGPT account quota or the model/provider context window.
+To measure actual model calls, pass a SQLite usage store and stable `run_id` to `ModelRouter.complete`; `aiops usage-report` summarizes only calls explicitly recorded this way. Provider-reported local cost does not include electricity or hardware depreciation.
 
 No model weights are included in this repository.
 

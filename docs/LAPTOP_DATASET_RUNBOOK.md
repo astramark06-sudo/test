@@ -98,6 +98,8 @@ The importer reports each expected file as imported or missing. Missing optional
 
 The importer now preflights every present CSV before opening the target database for writes. It rejects missing key headers, blank/whitespace-padded keys, duplicate stable keys, duplicate headers and malformed row widths. Keyless tables report exact duplicate-content rows because hash-key imports would otherwise collapse identical rows. The importer requires at least one recognised CSV file and stops before database writes if any present file fails preflight. Import outcomes are reported per source filename, so the plain and enriched candidate CSVs cannot overwrite each other's report entries when both are present. When both candidate-register files are supplied, preflight also requires the enriched export to retain every raw-register column and exactly the same Candidate_ID set; otherwise import stops before any database writes. The full bundle is written inside one SQLite transaction, including source-index rows, and rolls back as a unit if a write fails.
 
+Before any write import, create a verified backup of the working database with `aiops backup-db ./backups/laptop-before-import.sqlite --db ./data/laptop_research.sqlite`. Keep the original Library snapshot unchanged and use a separate working database as the write target. The backup command uses SQLite's online backup API and runs an integrity check before writing the destination.
+
 After import, inspect counts (dataset names are the left-hand values in the import report):
 
 ```bash

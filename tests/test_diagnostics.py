@@ -109,3 +109,12 @@ def test_doctor_reports_host_resource_inventory_without_changing_state(
     assert checks["Physical RAM"]["status"] == "INFO"
     assert checks["Disk free"]["status"] in {"INFO", "WARN"}
     assert checks["GPU inventory tooling"]["status"] == "INFO"
+
+
+
+def test_doctor_accepts_all_loopback_ipv4_addresses(tmp_path: Path, monkeypatch):
+    monkeypatch.setenv("OLLAMA_BASE_URL", "http://127.0.0.2:11434")
+
+    checks = collect_diagnostics(tmp_path / "missing.sqlite", tmp_path)
+
+    assert check_map(checks)["Ollama endpoint"]["status"] == "PASS"

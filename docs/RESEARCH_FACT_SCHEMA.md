@@ -12,6 +12,8 @@ Record the strongest identity level supported by the evidence:
 4. **Platform / processor only** — CPU or chipset identified but chassis/configuration remains unresolved.
 5. **Unresolved** — insufficient evidence to identify the product.
 
+The automated configuration matcher is a conservative candidate filter, not an SKU resolver. It requires exact normalized brand and processor text, rejects numeric RAM/storage capacity conflicts (so an observed 8 GB does not match 18 GB), and treats missing research capacity as unknown. Even a unique matching configuration row remains a family/configuration lead; it does not prove the listing's exact SKU or part number. Keep the match status, confidence and evidence references visible for review.
+
 Recommended fields:
 
 | Field | Meaning |

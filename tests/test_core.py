@@ -215,3 +215,37 @@ def test_workflow_rejects_legacy_checkpoints_without_a_saved_plan(tmp_path: Path
             [Step("first", lambda _: {"done": True})],
             run_id="legacy-run",
         )
+
+
+
+def test_multi_dataset_import_rolls_back_every_table_on_write_failure(
+    tmp_path: Path,
+):
+    store = SQLiteStore(tmp_path / "db.sqlite")
+    batches = [
+        {
+            "dataset": "first",
+            "rows": [{"Candidate_ID": "S1-001", "title": "Acer"}],
+            "key_field": "Candidate_ID",
+            "source_file": "first.csv",
+        },
+        {
+            "dataset": "second",
+            "rows": [{"title": "Missing stable key"}],
+            "key_field": "Candidate_ID",
+            "source_file": "second.csv",
+        },
+    ]
+
+    with pytest.raises(KeyError):
+        store.import_dataset_batches(
+            batches,
+            sources=[{
+                "uri": "https://manufacturer.example/spec",
+                "title": "Manufacturer specification",
+            }],
+        )
+
+    assert store.count_dataset_records("first") == 0
+    assert store.count_dataset_records("second") == 0
+    assert store.list_sources() == []

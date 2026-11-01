@@ -59,6 +59,7 @@ def main() -> None:
                 "source_files": [],
                 "missing_source_files": [],
                 "rows_preflighted": 0,
+                "rows": 0,
                 "duplicate_content_rows": 0,
                 "rows_imported": 0,
             },
@@ -80,6 +81,7 @@ def main() -> None:
         })
         dataset_report["status"] = "preflight_ok"
         dataset_report["rows_preflighted"] += len(batch.rows)
+        dataset_report["rows"] = dataset_report["rows_preflighted"]
         dataset_report["duplicate_content_rows"] += batch.duplicate_content_rows
         report["files"].append(file_report)
         batches.append((filename, dataset, key_field, path, batch, file_report))
@@ -103,6 +105,7 @@ def main() -> None:
         dataset_report = report["datasets"][dataset]
         dataset_report["status"] = "imported"
         dataset_report["rows_imported"] += imported
+        dataset_report["rows"] = dataset_report["rows_imported"]
         dataset_report["stored_rows_after_import"] = store.count_dataset_records(dataset)
         if dataset not in dataset_report.setdefault("imported_source_files", []):
             dataset_report["imported_source_files"].append(filename)

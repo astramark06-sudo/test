@@ -151,13 +151,13 @@ def test_doctor_accepts_long_n8n_key_without_revealing_it(
 def test_doctor_reports_all_local_inference_endpoint_states(tmp_path: Path, monkeypatch):
     monkeypatch.setenv("LM_STUDIO_BASE_URL", "http://127.0.0.4:1234")
     monkeypatch.setenv("VLLM_BASE_URL", "https://remote.example/v1")
-    monkeypatch.setenv("LLAMACPP_BASE_URL", "http://[")
+    monkeypatch.setenv("CUSTOM_OPENAI_BASE_URL", "http://[")
 
     checks = check_map(collect_diagnostics(tmp_path / "missing.sqlite", tmp_path))
 
     assert checks["LM Studio endpoint"]["status"] == "PASS"
     assert checks["vLLM endpoint"]["status"] == "WARN"
-    assert checks["llama.cpp endpoint"]["status"] == "FAIL"
+    assert checks["OpenAI-compatible local endpoint"]["status"] == "FAIL"
 
 
 def test_doctor_reports_optional_package_versions_without_reading_secrets(

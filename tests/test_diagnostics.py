@@ -145,3 +145,31 @@ def test_doctor_accepts_long_n8n_key_without_revealing_it(
 
     assert check["status"] == "PASS"
     assert secret not in repr(checks)
+
+
+
+def test_doctor_reports_all_local_inference_endpoint_states(tmp_path: Path, monkeypatch):
+    monkeypatch.setenv("LM_STUDIO_BASE_URL", "http://127.0.0.4:1234")
+    monkeypatch.setenv("VLLM_BASE_URL", "https://remote.example/v1")
+    monkeypatch.setenv("LLAMACPP_BASE_URL", "http://[")
+
+    checks = check_map(collect_diagnostics(tmp_path / "missing.sqlite", tmp_path))
+
+    assert checks["LM Studio endpoint"]["status"] == "PASS"
+    assert checks["vLLM endpoint"]["status"] == "WARN"
+    assert checks["llama.cpp endpoint"]["status"] == "FAIL"
+
+
+def test_doctor_reports_optional_package_versions_without_reading_secrets(
+    tmp_path: Path, monkeypatch
+):
+    monkeypatch.setenv("OPENAI_API_KEY", "never-print-this-value")
+
+    checks = collect_diagnostics(tmp_path / "missing.sqlite", tmp_path)
+    package_checks = [
+        item for item in checks if item["name"].startswith("Optional:")
+    ]
+
+    assert any(item["name"] == "Optional: PaddlePaddle" for item in package_checks)
+    assert all(item["status"] in {"AVAILABLE", "NOT INSTALLED"} for item in package_checks)
+    assert "never-print-this-value" not in repr(checks)

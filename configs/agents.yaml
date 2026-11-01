@@ -1,0 +1,29 @@
+agents:
+  planner:
+    tier: strong
+    purpose: decompose goals into dependency-aware steps
+    tools: [memory.search, workflow.create]
+  extractor:
+    tier: fast
+    purpose: structured extraction from OCR and documents
+    tools: [filesystem.read, ocr.run, sqlite.write]
+  researcher:
+    tier: strong
+    purpose: verify specifications against primary sources
+    tools: [fetch.search, playwright.navigate, sources.record]
+    requirements: [cite_claims, retain_page_url, distinguish_fact_from_inference]
+  validator:
+    tier: strong
+    purpose: validate SKUs, deduplicate and flag conflicts
+    tools: [sqlite.query, python.validate]
+  reviewer:
+    tier: deep
+    purpose: audit outputs and unresolved conflicts
+    tools: [memory.search, sources.read, artifacts.inspect]
+workflow_defaults:
+  max_parallel_tasks: 3
+  max_retries: 2
+  checkpoint_every_step: true
+  require_source_for_researched_fields: true
+  require_review_for_conflicts: true
+  never_overwrite_raw_ocr: true

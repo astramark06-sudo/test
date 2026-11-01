@@ -278,3 +278,40 @@ def test_workflow_rejects_blank_step_revision(tmp_path: Path):
     with pytest.raises(ValueError, match="non-empty revision"):
         WorkflowEngine(store).run("blank", {}, [Step("enrich", lambda _: {}, revision=" ")], run_id="blank-run")
     assert store.get_run("blank-run") is None
+
+
+
+@pytest.mark.parametrize(
+    ("model", "endpoint_env", "endpoint"),
+    [
+        ("ollama_chat/qwen2.5:7b", "OLLAMA_BASE_URL", "http://127.0.0.1:11434"),
+        ("lm_studio/qwen", "LM_STUDIO_BASE_URL", "http://127.0.0.1:1234/v1"),
+        ("vllm/qwen", "VLLM_BASE_URL", "http://127.0.0.2:8000/v1"),
+        ("llamacpp/qwen", "LLAMACPP_BASE_URL", "http://localhost:8080/v1"),
+    ],
+)
+def test_model_router_passes_configured_loopback_endpoint_to_litellm(
+    monkeypatch, model: str, endpoint_env: str, endpoint: str
+):
+    import sys
+    from types import ModuleType
+
+    calls = {}
+
+    def completion(**kwargs):
+        calls.update(kwargs)
+        return {"ok": True}
+
+    fake_litellm = ModuleType("litellm")
+    fake_litellm.completion = completion
+    monkeypatch.setitem(sys.modules, "litellm", fake_litellm)
+    monkeypatch.setenv(endpoint_env, endpoint)
+
+    response = ModelRouter({"fast": model}, allow_remote=False).complete(
+        [{"role": "user", "content": "test"}],
+        tier="fast",
+    )
+
+    assert response == {"ok": True}
+    assert calls["api_base"] == endpoint
+    assert calls["model"] == model

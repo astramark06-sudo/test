@@ -249,3 +249,19 @@ def test_multi_dataset_import_rolls_back_every_table_on_write_failure(
     assert store.count_dataset_records("first") == 0
     assert store.count_dataset_records("second") == 0
     assert store.list_sources() == []
+
+
+
+def test_resume_rejects_a_new_step_revision(tmp_path: Path):
+    store = SQLiteStore(tmp_path / "db.sqlite")
+    engine = WorkflowEngine(store)
+    engine.run("revisioned", {}, [Step("enrich", lambda _: {"v": 1}, revision="1")], run_id="revision-run")
+    with pytest.raises(ValueError, match="differs from the saved checkpoint plan"):
+        engine.run("revisioned", {}, [Step("enrich", lambda _: {"v": 2}, revision="2")], run_id="revision-run")
+
+
+def test_workflow_rejects_blank_step_revision(tmp_path: Path):
+    store = SQLiteStore(tmp_path / "db.sqlite")
+    with pytest.raises(ValueError, match="non-empty revision"):
+        WorkflowEngine(store).run("blank", {}, [Step("enrich", lambda _: {}, revision=" ")], run_id="blank-run")
+    assert store.get_run("blank-run") is None

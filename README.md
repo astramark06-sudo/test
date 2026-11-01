@@ -69,7 +69,7 @@ Playwright MCP setup: https://playwright.dev/docs/getting-started-mcp. The offic
 
 ## Data safety
 
-The public repo excludes data/, artifacts/, local DBs, environment files and secrets. Keep private OCR images and generated workbooks outside GitHub. CI runs lightweight unit tests; model weights and browser downloads are excluded.
+The public repo excludes data/, artifacts/, local DBs, environment files and secrets. Keep private OCR images and generated workbooks outside GitHub. CI runs unit tests across Python 3.10, 3.11, 3.12 and 3.13; model weights and browser downloads are excluded.
 
 ## Local dataset store
 
@@ -77,6 +77,8 @@ Import CSV datasets into SQLite without dropping source columns. Original row co
 
     aiops ingest-csv data/candidates.csv candidates --key-field Candidate_ID
     aiops dataset-count candidates
+
+Before creating or writing to the SQLite database, `aiops ingest-csv` validates the complete CSV: it requires a header, rejects empty or duplicate column names, checks every row width, and validates a supplied stable-key column for missing, blank, whitespace-padded or duplicate values. Keyless imports use deterministic row-content hashes; exact duplicate-content rows are reported because identical rows share one stored key. A failed preflight leaves the target database untouched.
 
 Dataset import is idempotent for a stable key field. Private datasets stay local and are excluded from Git.
 

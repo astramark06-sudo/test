@@ -16,10 +16,11 @@ def reconcile_text(engine_outputs: Mapping[str, Sequence[Mapping[str, Any]]]) ->
     nonempty = {name: value for name, value in readings.items() if value}
     normalized = {" ".join(value.casefold().split()) for value in nonempty.values()}
     conflict = len(normalized) > 1
+    incomplete = len(nonempty) != len(readings)
     consensus = next(iter(nonempty.values())) if len(normalized) == 1 and nonempty else None
     return {
         "engine_readings": readings,
         "consensus_text": consensus,
         "conflict": conflict,
-        "review_required": conflict or not nonempty,
+        "review_required": conflict or not nonempty or incomplete,
     }

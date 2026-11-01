@@ -22,7 +22,7 @@ A local-first AI workbench for auditable extraction, research, workflow automati
     pytest -q
     ruff check .
 
-Core storage, workflow, matching, and JSONL export functions need only Python and SQLite. Optional extras:
+Core storage, workflow, matching, JSONL, database-backup and file-manifest functions use the base Python dependencies (PyYAML and python-dotenv) plus SQLite; no model weights or hosted services are required. Optional extras:
 
     pip install -e '.[llm]'          # LiteLLM model abstraction
     pip install -e '.[agents]'       # LangGraph orchestration

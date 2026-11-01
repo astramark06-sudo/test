@@ -86,3 +86,9 @@ def test_dataset_import_is_idempotent_and_preserves_fields(tmp_path: Path):
     assert store.count_dataset_records("candidates") == 1
     restored = store.list_dataset_records("candidates", "Core i5")[0]["record"]
     assert restored == rows[0]
+
+
+def test_local_model_router_rejects_non_loopback_ollama_endpoint(monkeypatch):
+    monkeypatch.setenv("OLLAMA_BASE_URL", "https://remote.example:11434")
+    with pytest.raises(ModelNotConfigured):
+        ModelRouter({"fast": "ollama_chat/qwen2.5:7b"}, allow_remote=False).select("fast")

@@ -265,7 +265,7 @@ def collect_diagnostics(
         )
     else:
         checks.append(
-            _check("n8n encryption key", "PASS", "configured; value is intentionally hidden")
+            _check("n8n encryption key", "PASS", "configured with at least 32 characters; entropy is not assessed and the value is hidden")
         )
 
     database = Path(db_path).expanduser()

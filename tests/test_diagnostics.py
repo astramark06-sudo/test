@@ -96,3 +96,16 @@ def test_doctor_cli_json_output(tmp_path: Path, monkeypatch, capsys):
     assert any(item["name"] == "Python" for item in output)
     assert any(item["name"] == "SQLite database" for item in output)
     assert not database.exists()
+
+
+
+def test_doctor_reports_host_resource_inventory_without_changing_state(
+    tmp_path: Path,
+):
+    checks = check_map(collect_diagnostics(tmp_path / "missing.sqlite", tmp_path))
+
+    assert checks["Host OS / architecture"]["status"] == "INFO"
+    assert checks["CPU logical cores"]["status"] == "INFO"
+    assert checks["Physical RAM"]["status"] == "INFO"
+    assert checks["Disk free"]["status"] in {"INFO", "WARN"}
+    assert checks["GPU inventory tooling"]["status"] == "INFO"

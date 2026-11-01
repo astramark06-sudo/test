@@ -4,6 +4,7 @@ from __future__ import annotations
 import importlib.util
 import os
 import platform
+import shutil
 import sqlite3
 import sys
 from pathlib import Path
@@ -37,6 +38,52 @@ def _check(name: str, status: str, detail: str) -> dict[str, str]:
     return {"name": name, "status": status, "detail": detail}
 
 
+def _total_memory_bytes() -> int | None:
+    """Return physical RAM using only read-only OS APIs where available."""
+    if os.name == "nt":
+        try:
+            import ctypes
+
+            class MemoryStatus(ctypes.Structure):
+                _fields_ = [
+                    ("dwLength", ctypes.c_ulong),
+                    ("dwMemoryLoad", ctypes.c_ulong),
+                    ("ullTotalPhys", ctypes.c_ulonglong),
+                    ("ullAvailPhys", ctypes.c_ulonglong),
+                    ("ullTotalPageFile", ctypes.c_ulonglong),
+                    ("ullAvailPageFile", ctypes.c_ulonglong),
+                    ("ullTotalVirtual", ctypes.c_ulonglong),
+                    ("ullAvailVirtual", ctypes.c_ulonglong),
+                    ("ullAvailExtendedVirtual", ctypes.c_ulonglong),
+                ]
+
+            status = MemoryStatus()
+            status.dwLength = ctypes.sizeof(MemoryStatus)
+            if ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(status)):
+                return int(status.ullTotalPhys)
+        except (AttributeError, OSError, TypeError, ValueError):
+            return None
+
+    if hasattr(os, "sysconf"):
+        try:
+            pages = int(os.sysconf("SC_PHYS_PAGES"))
+            page_size = int(os.sysconf("SC_PAGE_SIZE"))
+            if pages > 0 and page_size > 0:
+                return pages * page_size
+        except (OSError, TypeError, ValueError):
+            return None
+    return None
+
+
+def _human_bytes(value: int) -> str:
+    amount = float(value)
+    for unit in ("B", "KiB", "MiB", "GiB", "TiB"):
+        if amount < 1024 or unit == "TiB":
+            return f"{amount:.1f} {unit}"
+        amount /= 1024
+    return f"{amount:.1f} TiB"
+
+
 def collect_diagnostics(
     db_path: str | Path = "./data/aiops.db",
     project_root: str | Path = ".",
@@ -48,6 +95,28 @@ def collect_diagnostics(
     values, credentials and .env contents are never returned.
     """
     checks: list[dict[str, str]] = []
+    checks.append(
+        _check(
+            "Host OS / architecture",
+            "INFO",
+            f"{platform.system()} {platform.release()} / {platform.machine()}",
+        )
+    )
+    checks.append(
+        _check(
+            "CPU logical cores",
+            "INFO",
+            str(os.cpu_count() or "unknown"),
+        )
+    )
+    total_memory = _total_memory_bytes()
+    checks.append(
+        _check(
+            "Physical RAM",
+            "INFO",
+            _human_bytes(total_memory) if total_memory else "unable to determine using standard OS APIs",
+        )
+    )
     version = sys.version_info
     version_text = platform.python_version()
     if version >= (3, 10):
@@ -89,6 +158,36 @@ def collect_diagnostics(
                 checks.append(
                     _check(f"Project file: {relative}", "INFO", "not found from this working directory")
                 )
+
+    disk_target = root
+    while not disk_target.exists() and disk_target != disk_target.parent:
+        disk_target = disk_target.parent
+    try:
+        disk_free = shutil.disk_usage(disk_target).free
+        checks.append(_check("Disk free", "INFO", f"{_human_bytes(disk_free)} on {disk_target.resolve()}"))
+    except OSError as exc:
+        checks.append(_check("Disk free", "WARN", f"unable to inspect filesystem: {exc}"))
+
+    gpu_tools = [
+        name for name in ("nvidia-smi", "rocm-smi", "system_profiler", "lspci")
+        if shutil.which(name)
+    ]
+    if gpu_tools:
+        checks.append(
+            _check(
+                "GPU inventory tooling",
+                "INFO",
+                f"available command(s): {', '.join(gpu_tools)}; commands are not executed by doctor",
+            )
+        )
+    else:
+        checks.append(
+            _check(
+                "GPU inventory tooling",
+                "INFO",
+                "no standard GPU inventory command found; use the host OS device manager for GPU/VRAM details",
+            )
+        )
 
     for label, module, extra in OPTIONAL_MODULES:
         try:

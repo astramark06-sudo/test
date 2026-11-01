@@ -324,3 +324,45 @@ def test_model_router_blocks_non_native_llamacpp_prefix():
             {"fast": "llamacpp/qwen"},
             allow_remote=False,
         ).select("fast")
+
+
+
+def test_model_router_records_usage_when_a_store_and_run_id_are_supplied(
+    tmp_path: Path, monkeypatch
+):
+    import sys
+    from types import ModuleType
+
+    fake_litellm = ModuleType("litellm")
+    fake_litellm.completion = lambda **_kwargs: {
+        "model": "ollama_chat/qwen2.5:7b",
+        "usage": {
+            "prompt_tokens": 120,
+            "completion_tokens": 30,
+            "total_tokens": 150,
+        },
+        "_hidden_params": {"response_cost": 0.0},
+    }
+    monkeypatch.setitem(sys.modules, "litellm", fake_litellm)
+    monkeypatch.setenv("OLLAMA_BASE_URL", "http://localhost:11434")
+    store = SQLiteStore(tmp_path / "usage.sqlite")
+
+    response = ModelRouter(
+        {"fast": "ollama_chat/qwen2.5:7b"},
+        allow_remote=False,
+    ).complete(
+        [{"role": "user", "content": "test"}],
+        tier="fast",
+        usage_store=store,
+        run_id="laptop-enrichment-001",
+    )
+
+    assert response["usage"]["total_tokens"] == 150
+    usage = store.list_model_usage("laptop-enrichment-001")
+    assert len(usage) == 1
+    assert usage[0]["model"] == "ollama_chat/qwen2.5:7b"
+    assert usage[0]["tier"] == "fast"
+    assert usage[0]["prompt_tokens"] == 120
+    assert usage[0]["completion_tokens"] == 30
+    assert usage[0]["total_tokens"] == 150
+    assert usage[0]["cost_usd"] == 0.0

@@ -156,3 +156,14 @@ class SQLiteStore:
             else:
                 rows=con.execute("SELECT * FROM model_usage ORDER BY created_at DESC LIMIT ?",(limit,)).fetchall()
             return [dict(row) for row in rows]
+
+    def usage_summary(self, run_id: str | None = None) -> list[dict[str, Any]]:
+        """Aggregate observed usage and reported provider cost by model and task tier."""
+        with self.connect() as con:
+            sql = "SELECT model,tier,COUNT(*) AS calls,SUM(prompt_tokens) AS prompt_tokens,SUM(completion_tokens) AS completion_tokens,SUM(total_tokens) AS total_tokens,SUM(cost_usd) AS cost_usd FROM model_usage"
+            args: list[Any] = []
+            if run_id:
+                sql += " WHERE run_id=?"
+                args.append(run_id)
+            sql += " GROUP BY model,tier ORDER BY total_tokens DESC"
+            return [dict(row) for row in con.execute(sql, args).fetchall()]

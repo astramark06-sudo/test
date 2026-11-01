@@ -28,9 +28,11 @@ Core storage, workflow, matching, and JSONL export functions need only Python an
     pip install -e '.[agents]'       # LangGraph orchestration
     pip install -e '.[mcp]'          # MCP client SDK
     pip install -e '.[browser]'      # Playwright browser automation
-    pip install -e '.[ocr]'          # PaddleOCR/OpenCV
+    pip install -e '.[ocr]'          # PaddleOCR 3.x + PaddlePaddle CPU + OpenCV
     pip install -e '.[data]'         # DuckDB/RapidFuzz
     pip install -e '.[observability]' # Langfuse client
+
+See [OCR engine compatibility](docs/OCR_ENGINE_COMPATIBILITY.md) for the pinned PaddleOCR 3.x API, CPU install path, model-download behavior and OCR adapter contract.
 
 ## Model routing and token efficiency
 
@@ -92,6 +94,7 @@ The private laptop OCR delivery has its own audited workbench and an ingestion r
 
 - [Laptop dataset runbook](docs/LAPTOP_DATASET_RUNBOOK.md): inspect the private read-only SQLite snapshot, import compatible CSV batches, and run coverage checks.
 - [Research fact schema](docs/RESEARCH_FACT_SCHEMA.md): capture exact-SKU/model-family scope, one fact per source, price-type separation and conflict handling.
+- [OCR engine compatibility](docs/OCR_ENGINE_COMPATIBILITY.md): PaddleOCR 3.x API, compatible CPU runtime and OCR result normalization.
 - [Official model source audit — 2026-11-02](docs/OFFICIAL_MODEL_SOURCE_AUDIT_2026-11-02.md): scoped manufacturer-source checks and unresolved SKU/OS conflicts; no inferred price updates.
 - [Local deployment preflight](docs/LOCAL_DEPLOYMENT_PREFLIGHT.md): host setup, local-only model routing, MCP/browser boundaries, n8n hardening, backups and release gates.
 - [Optional free-tier cloud services](docs/OPTIONAL_FREE_CLOUD_SERVICES_2026-11-02.md): current Neon, Supabase, Cloudflare Workers and D1 limits; local-first data boundaries and cost controls.

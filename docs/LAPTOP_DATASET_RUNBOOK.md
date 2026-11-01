@@ -65,7 +65,7 @@ source .venv/bin/activate
 python -m pip install -e ".[dev]"
 ```
 
-Keep the private source bundle in a local directory ignored by Git. Place the importer-compatible CSV exports in one input directory, then run:
+Keep the private source bundle in a local directory ignored by Git. Before extraction, create a SHA-256 manifest beside the original archive with `aiops hash-tree ./private-source ./private-source.manifest.json`; verify it with `aiops verify-manifest ./private-source ./private-source.manifest.json` after copying or restoring the archive. Place the importer-compatible CSV exports in one input directory, then run:
 
 ```bash
 # First validate the complete source directory without creating or changing a database:

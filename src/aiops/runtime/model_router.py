@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from enum import Enum
 from typing import Any
+from urllib.parse import urlparse
 
 class ModelTier(str, Enum):
     FAST = "fast"
@@ -25,6 +26,12 @@ class ModelRouter:
         remote = ("openai/","anthropic/","gemini/","azure/","bedrock/","vertex_ai/")
         if not self.allow_remote and model.startswith(remote):
             raise ModelNotConfigured("Remote model blocked; set AIOPS_ALLOW_REMOTE_MODELS=true only when charges are accepted.")
+        if not self.allow_remote:
+            api_base = os.getenv("OLLAMA_BASE_URL", "")
+            if api_base:
+                host = urlparse(api_base).hostname
+                if host not in {"localhost", "127.0.0.1", "::1"}:
+                    raise ModelNotConfigured("Non-loopback model endpoint blocked in local-only mode.")
         return model
 
     def complete(self, messages: list[dict[str, Any]], tier: ModelTier | str = ModelTier.STRONG, max_tokens: int | None = None, **kwargs: Any) -> Any:

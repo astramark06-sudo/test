@@ -43,33 +43,35 @@ def main() -> None:
     # Preflight every present file before opening the database for writes. A malformed
     # late file must not leave a partially imported multi-dataset bundle.
     batches = []
-    report = {"database": str(args.db), "datasets": {}}
+    report = {"database": str(args.db), "files": []}
     for filename, (dataset, key_field) in DATASETS.items():
         path = args.input_dir / filename
+        file_report = {"file": filename, "dataset": dataset, "source": str(path)}
         if not path.exists():
-            report["datasets"][dataset] = {"status": "missing", "source": str(path)}
+            file_report["status"] = "missing"
+            report["files"].append(file_report)
             continue
         try:
             batch = load_csv_batch(path, key_field)
         except ValueError as exc:
             raise SystemExit(f"Import preflight failed: {exc}") from exc
-        batches.append((filename, dataset, key_field, path, batch))
-        report["datasets"][dataset] = {
+        file_report.update({
             "status": "preflight_ok",
             "rows": len(batch.rows),
             "duplicate_content_rows": batch.duplicate_content_rows,
-            "source": str(path),
-        }
+        })
+        report["files"].append(file_report)
+        batches.append((filename, dataset, key_field, path, batch, file_report))
 
     if not batches:
         raise SystemExit(f"No recognised research CSV files found in {args.input_dir}")
 
     store = SQLiteStore(args.db)
-    for filename, dataset, key_field, path, batch in batches:
+    for filename, dataset, key_field, path, batch, file_report in batches:
         imported = store.upsert_dataset_records(
             dataset, batch.rows, key_field, str(path)
         )
-        report["datasets"][dataset].update({
+        file_report.update({
             "status": "imported",
             "rows_imported": imported,
             "stored_rows_after_import": store.count_dataset_records(dataset),

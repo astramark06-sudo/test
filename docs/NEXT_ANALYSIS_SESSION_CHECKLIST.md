@@ -117,6 +117,8 @@ For the new workbook revision:
 - Run importer mappings from `scripts/ingest_research_bundle.py` and save the import report.
 - Do not place both plain and enriched candidate-register CSVs in the same batch unless enriched is intentionally the full superset; the later import upserts the same candidate IDs.
 - Verify dataset counts, stable keys, source URLs and row payload retrieval after import.
+- Run the importer in `--dry-run` mode first; review both the aggregate `datasets` summary and per-source-file report before importing.
+- Confirm duplicate stable IDs and malformed row shapes are rejected, while keyless duplicate-content rows are reported.
 - Run database integrity checks and restore-test on a separate copy.
 - Keep the previous database as a recoverable baseline until all checks pass.
 

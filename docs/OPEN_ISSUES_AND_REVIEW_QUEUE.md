@@ -2,6 +2,10 @@
 
 This is the active review order for the saved private laptop research delivery. It is a process register, not a declaration that unresolved records have been fixed. Keep candidate/listing records and their raw evidence unchanged while review decisions are added.
 
+## Resolved in the 2026-11-02 release
+
+- **Final Tesseract tile / OCR coverage gap:** linked to existing candidate `S4-348`. It did not create a new candidate or duplicate price. The release manifest records zero unresolved coverage gaps. Re-open only if new source pixels contradict this mapping; do not treat it as a separate listing or price.
+
 ## Priority 0 — prevent incorrect product claims
 
 | Issue | Evidence | Required action | Do not do |
@@ -13,7 +17,7 @@ This is the active review order for the saved private laptop research delivery. 
 | Acer Aspire Lite AL15-41 R3-5400U vs R3-7330U | Official store indexes both CPU/storage combinations under different references | Confirm CPU and 256GB/512GB drive before selecting the part | Assume same AL15-41 implies same internals |
 | Lenovo V15 G4 AMN R3-7320U / 8GB / 512GB | [Lenovo PSREF 83CQ000BIN](https://psref.lenovo.com/Detail/Lenovo_V15_G4_AMN?M=83CQ000BIN) and [PSREF 83CQ000NIN](https://psref.lenovo.com/Detail/Lenovo_V15_G4_AMN?M=83CQ000NIN) both specify 8GB soldered LPDDR5-5500, 512GB SSD, 38Wh and FHD TN 250-nit panel; BIN lists Windows 11 Pro, while NIN lists Windows 11 Home Single Language. | Obtain exact MTM from listing/label and use its PSREF page; preserve the OS/licence difference. | Apply one MTM's OS, display or service facts to all V15 G4 AMN units. |
 | Motorola title fragment "Motobook 6" | Current Moto Book 60 and Moto Book 60 Pro product names exist, but the OCR title is truncated | Recover full title, CPU, RAM/storage and SKU from original screenshot/retailer listing | Infer Moto Book 60/Pro from the price or truncated title |
-| Final OCR audit tile | Tesseract output contains clipped listing-like text without safe identity | Inspect the original crop and adjacent tile boundaries; create a record only if identity and context are visible | Attach a product or price to the clipped fragment |
+
 
 ## Priority 1 — complete the conservative reconciliation
 

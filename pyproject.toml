@@ -17,11 +17,11 @@ agents = ["langgraph>=0.2", "langgraph-checkpoint-sqlite>=2"]
 mcp = ["mcp>=2.3,<3"]
 browser = ["playwright>=1.48"]
 data = ["duckdb>=1.0", "rapidfuzz>=3.9"]
-ocr = ["paddleocr>=3.7,<3.8", "paddlepaddle==3.2.0", "opencv-python-headless>=4.9"]
+ocr = ["paddleocr>=3.7,<3.8", "paddlepaddle==3.3.1", "opencv-python-headless>=4.9"]
 ocr-easyocr = ["easyocr>=1.7"]
 ocr-tesseract = ["pytesseract>=0.3.10"]
 observability = ["langfuse>=2.0"]
-all = ["litellm>=1.70", "langgraph>=0.2", "langgraph-checkpoint-sqlite>=2", "mcp>=2.3,<3", "playwright>=1.48", "duckdb>=1.0", "rapidfuzz>=3.9", "paddleocr>=3.7,<3.8", "paddlepaddle==3.2.0", "opencv-python-headless>=4.9", "easyocr>=1.7", "pytesseract>=0.3.10", "langfuse>=2.0"]
+all = ["litellm>=1.70", "langgraph>=0.2", "langgraph-checkpoint-sqlite>=2", "mcp>=2.3,<3", "playwright>=1.48", "duckdb>=1.0", "rapidfuzz>=3.9", "paddleocr>=3.7,<3.8", "paddlepaddle==3.3.1", "opencv-python-headless>=4.9", "easyocr>=1.7", "pytesseract>=0.3.10", "langfuse>=2.0"]
 
 [project.scripts]
 aiops = "aiops.cli:main"
